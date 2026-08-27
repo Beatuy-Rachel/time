@@ -1,0 +1,14 @@
+{
+  "name": "拾光 | 时间与成长",
+  "short_name": "拾光",
+  "description": "记录时间，回顾节奏，持续变好。",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f4f0e8",
+  "theme_color": "#f4f0e8",
+  "lang": "zh-CN",
+  "orientation": "portrait-primary",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

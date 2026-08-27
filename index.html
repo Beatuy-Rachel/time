@@ -1,0 +1,2007 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#f4f0e8" />
+  <meta name="description" content="拾光：记录时间，回顾节奏，持续变好。" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="拾光" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" href="icon.svg" type="image/svg+xml" />
+  <title>拾光 | 时间与成长</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500&family=Noto+Sans+SC:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@0.468.0"></script>
+  <style>
+    :root {
+      --paper: #f4f0e8;
+      --surface: #fbfaf7;
+      --ink: #1f302f;
+      --muted: #70807b;
+      --line: #dfe2da;
+      --sage: #7b9a88;
+      --sage-dark: #507264;
+      --sage-pale: #e8efea;
+      --coral: #de846e;
+      --coral-pale: #f8e3da;
+      --yellow: #dfb85e;
+      --yellow-pale: #f8efce;
+      --blue: #6586a6;
+      --blue-pale: #e4edf4;
+      --shadow: 0 16px 36px rgba(30, 52, 46, 0.08);
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; }
+    body {
+      background: #e7e4dd;
+      color: var(--ink);
+      font-family: "Noto Sans SC", "DM Sans", sans-serif;
+      letter-spacing: 0;
+    }
+    button, input, textarea, select { font: inherit; letter-spacing: 0; }
+    button { cursor: pointer; }
+    button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible {
+      outline: 3px solid rgba(101, 134, 166, .34);
+      outline-offset: 2px;
+    }
+    .app-shell {
+      width: min(100%, 480px);
+      min-height: 100vh;
+      margin: 0 auto;
+      background: var(--paper);
+      position: relative;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+    .topbar {
+      padding: 23px 22px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(223,226,218,.7);
+    }
+    .brand { display: flex; gap: 10px; align-items: center; }
+    .brand-mark {
+      width: 31px; height: 31px; border-radius: 50%;
+      background: var(--sage-dark); color: #fff;
+      display: grid; place-items: center;
+    }
+    .brand h1 { font-size: 18px; line-height: 1; margin: 0; font-weight: 600; }
+    .brand small { display: block; margin-top: 5px; color: var(--muted); font-size: 11px; }
+    .top-actions { display: flex; gap: 6px; }
+    .icon-button {
+      border: 0; background: transparent; color: var(--muted);
+      width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center;
+    }
+    .icon-button:hover { background: var(--surface); color: var(--ink); }
+    main { padding: 20px 20px 100px; }
+    .view { display: none; animation: enter .2s ease-out; }
+    .view.active { display: block; }
+    @keyframes enter { from { opacity: .3; transform: translateY(3px); } to { opacity: 1; transform: translateY(0); } }
+    .eyebrow { color: var(--muted); font-size: 12px; margin: 0 0 8px; }
+    .section-title { display: flex; align-items: center; justify-content: space-between; margin: 24px 0 12px; }
+    .section-title h2 { margin: 0; font-size: 16px; font-weight: 600; }
+    .section-title a, .text-button { color: var(--sage-dark); font-size: 12px; border: 0; background: none; padding: 4px 0; }
+    .hero-title { font-size: 28px; margin: 0; line-height: 1.26; font-weight: 600; letter-spacing: -0.5px; }
+    .hero-title span { color: var(--sage-dark); }
+    .day-row { display: flex; align-items: center; justify-content: space-between; margin-top: 12px; }
+    .date-chip { color: var(--muted); font-size: 12px; display: flex; gap: 6px; align-items: center; }
+    .location-button { border: 0; background: transparent; padding: 2px 0; color: var(--muted); font-size: 12px; display: inline-flex; gap: 6px; align-items: center; text-align: left; }
+    .location-button:hover { color: var(--sage-dark); }
+    .location-button.is-loading { cursor: wait; }
+    .mood-chip { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--sage-dark); background: var(--sage-pale); padding: 6px 10px; border-radius: 20px; }
+    .summary-strip { margin-top: 20px; background: var(--surface); border: 1px solid var(--line); padding: 14px 16px; border-radius: 8px; }
+    .summary-strip-head { display: flex; align-items: baseline; justify-content: space-between; }
+    .summary-strip strong { font-size: 25px; font-weight: 500; }
+    .summary-strip label { color: var(--muted); font-size: 12px; }
+    .progress-track { height: 7px; margin-top: 11px; border-radius: 5px; background: #e7ebe5; overflow: hidden; }
+    .progress-fill { height: 100%; border-radius: inherit; background: var(--sage); width: 68%; transition: width .3s; }
+    .summary-footer { margin-top: 9px; display: flex; justify-content: space-between; color: var(--muted); font-size: 11px; }
+    .section-tools { display: flex; gap: 7px; }
+    .soft-button, .primary-button {
+      border: 0; border-radius: 7px; padding: 9px 12px; display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+      font-size: 12px; transition: transform .15s, background .15s;
+    }
+    .soft-button { background: var(--surface); border: 1px solid var(--line); color: var(--ink); }
+    .primary-button { background: var(--sage-dark); color: #fff; }
+    .soft-button:hover, .primary-button:hover { transform: translateY(-1px); }
+    .primary-button:disabled { opacity: .55; cursor: not-allowed; transform: none; }
+    .active-stack { display: grid; gap: 9px; }
+    .active-empty { padding: 16px 14px; background: var(--surface); border: 1px dashed var(--line); border-radius: 8px; color: var(--muted); font-size: 11px; text-align: center; }
+    .active-card {
+      background: var(--ink); color: #fff; padding: 14px 15px; border-radius: 8px;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .active-card.compact { background: var(--sage-dark); }
+    .active-main { display: flex; gap: 11px; align-items: center; }
+    .active-icon { width: 35px; height: 35px; border-radius: 9px; background: rgba(255,255,255,.14); display: grid; place-items: center; }
+    .active-card h3 { margin: 0; font-size: 14px; font-weight: 500; }
+    .active-card p { margin: 4px 0 0; color: rgba(255,255,255,.65); font-size: 11px; }
+    .timer { font-family: "DM Sans", sans-serif; font-size: 22px; font-weight: 500; letter-spacing: .5px; }
+    .stop-button { border: 1px solid rgba(255,255,255,.35); color: #fff; background: transparent; border-radius: 6px; padding: 6px 9px; font-size: 11px; margin-left: 9px; }
+    .stop-button:hover { background: rgba(255,255,255,.12); }
+    .timeline {
+      background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 14px 12px 12px;
+    }
+    .timeline-scale { display: flex; justify-content: space-between; color: var(--muted); font-size: 10px; padding-left: 56px; margin-bottom: 8px; }
+    .timeline-row { min-height: 34px; display: grid; grid-template-columns: 48px 1fr; gap: 8px; align-items: center; position: relative; }
+    .timeline-sample[hidden] { display: none; }
+    .timeline-row + .timeline-row { border-top: 1px dashed #edf0eb; }
+    .timeline-time { font-family: "DM Sans", sans-serif; font-size: 10px; color: var(--muted); }
+    .timeline-lane { min-height: 21px; position: relative; }
+    .time-block { position: absolute; top: 0; height: 21px; border-radius: 5px; padding: 3px 7px; font-size: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .time-block.sage { background: var(--sage-pale); color: var(--sage-dark); left: 0; width: 37%; }
+    .time-block.blue { background: var(--blue-pale); color: #496b87; left: 29%; width: 34%; top: 23px; }
+    .time-block.coral { background: var(--coral-pale); color: #ac5c4a; left: 64%; width: 29%; }
+    .time-block.yellow { background: var(--yellow-pale); color: #92762c; left: 6%; width: 20%; }
+    .timeline-records { display: grid; gap: 0; }
+    .timeline-entry { min-height: 36px; display: grid; grid-template-columns: 48px minmax(0, 1fr) 24px; gap: 8px; align-items: center; position: relative; }
+    .timeline-entry + .timeline-entry { border-top: 1px dashed #edf0eb; }
+    .timeline-entry .timeline-lane { min-height: 25px; }
+    .timeline-entry .time-block { top: 2px; min-width: 8%; }
+    .timeline-delete, .history-delete { width: 24px; height: 24px; padding: 0; border: 0; border-radius: 50%; display: grid; place-items: center; background: transparent; color: var(--muted); opacity: .72; }
+    .timeline-delete:hover, .history-delete:hover { background: var(--coral-pale); color: #ac5c4a; opacity: 1; }
+    .timeline-delete svg, .history-delete svg { width: 13px; height: 13px; }
+    .timeline-legend { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 13px; color: var(--muted); font-size: 10px; }
+    .legend-item { display: inline-flex; align-items: center; gap: 5px; }
+    .legend-dot { width: 7px; height: 7px; border-radius: 2px; }
+    .dot-sage { background: var(--sage); } .dot-blue { background: var(--blue); } .dot-coral { background: var(--coral); } .dot-yellow { background: var(--yellow); }
+    .habit-list { display: grid; gap: 8px; }
+    .habit-row { display: flex; align-items: center; gap: 10px; background: transparent; padding: 9px 2px; border-bottom: 1px solid var(--line); }
+    .habit-check { appearance: none; width: 20px; height: 20px; border: 1.5px solid #b8c4bc; border-radius: 50%; position: relative; flex: 0 0 auto; cursor: pointer; background: transparent; }
+    .habit-check:checked { border-color: var(--sage-dark); background: var(--sage-dark); }
+    .habit-check:checked::after { content: ""; position: absolute; left: 5px; top: 2px; width: 6px; height: 10px; border: solid #fff; border-width: 0 2px 2px 0; transform: rotate(45deg); }
+    .habit-row label { font-size: 13px; flex: 1; }
+    .habit-row small { color: var(--muted); font-size: 10px; }
+    .mini-card { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 15px; }
+    .metric-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .metric { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 12px 10px; }
+    .metric-button { width: 100%; color: var(--ink); font: inherit; text-align: left; cursor: pointer; appearance: none; transition: border-color .15s, transform .15s, box-shadow .15s; }
+    .metric-button:hover { border-color: var(--sage); transform: translateY(-1px); box-shadow: 0 5px 12px rgba(30, 52, 46, .06); }
+    .metric-button:active { transform: translateY(0); }
+    .metric-button:focus-visible { border-color: var(--blue); }
+    .metric-top { display: flex; align-items: center; justify-content: space-between; gap: 5px; margin-bottom: 11px; }
+    .metric-icon { width: 25px; height: 25px; border-radius: 7px; display: grid; place-items: center; }
+    .metric-icon svg { width: 14px; height: 14px; }
+    .metric-icon.coral { background: var(--coral-pale); color: var(--coral); }
+    .metric-icon.blue { background: var(--blue-pale); color: var(--blue); }
+    .metric-icon.yellow { background: var(--yellow-pale); color: #92762c; }
+    .metric-action { display: inline-flex; align-items: center; gap: 2px; color: var(--sage-dark); font-size: 9px; white-space: nowrap; }
+    .metric-action svg { width: 11px; height: 11px; }
+    .metric strong { display: flex; align-items: baseline; gap: 2px; font-family: "DM Sans", sans-serif; font-weight: 500; font-size: 20px; margin-top: 7px; }
+    .metric strong small { font-size: 12px; font-weight: 400; color: var(--muted); }
+    .metric-progress { height: 4px; margin-top: 10px; border-radius: 3px; background: #e7ebe5; overflow: hidden; }
+    .metric-progress span { display: block; height: 100%; border-radius: inherit; background: var(--sage); }
+    .metric-progress.coral span { background: var(--coral); }
+    .metric-progress.blue span { background: var(--blue); }
+    .metric-progress.yellow span { background: var(--yellow); }
+    .goal-list { display: grid; gap: 10px; }
+    .goal-card { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 14px; }
+    .goal-card-head { display: flex; gap: 10px; align-items: flex-start; }
+    .goal-card-icon { width: 34px; height: 34px; border-radius: 9px; background: var(--coral-pale); color: var(--coral); display: grid; place-items: center; flex: 0 0 auto; }
+    .goal-card-copy { flex: 1; min-width: 0; }
+    .goal-card-copy h3 { margin: 0; font-size: 14px; font-weight: 500; }
+    .goal-card-copy p { margin: 5px 0 0; color: var(--muted); font-size: 11px; line-height: 1.55; }
+    .goal-deadline { display: flex; align-items: center; gap: 5px; margin-top: 8px; color: var(--sage-dark); font-size: 10px; }
+    .goal-deadline svg { width: 13px; height: 13px; flex: 0 0 auto; }
+    .goal-deadline strong { font-weight: 500; }
+    .goal-deadline.is-today { color: #92762c; }
+    .goal-deadline.is-overdue { color: #ac5c4a; }
+    .goal-card-edit { border: 0; background: transparent; color: var(--sage-dark); font-size: 11px; padding: 4px 0; }
+    .goal-actions { display: flex; flex-wrap: wrap; gap: 6px; margin: 13px 0 0 44px; }
+    .goal-action-chip { border: 1px solid var(--line); border-radius: 15px; background: transparent; color: var(--ink); font-size: 10px; padding: 6px 9px; }
+    .goal-action-chip:hover { background: var(--sage-pale); border-color: var(--sage); color: var(--sage-dark); }
+    .goal-empty { border: 1px dashed #bfc9c2; border-radius: 8px; padding: 19px 15px; text-align: center; color: var(--muted); }
+    .goal-empty strong { display: block; color: var(--ink); font-size: 13px; font-weight: 500; }
+    .goal-empty p { margin: 6px 0 12px; font-size: 11px; line-height: 1.6; }
+    .metric p { margin: 0; font-size: 11px; color: var(--muted); }
+    .metric em { font-style: normal; font-size: 10px; color: var(--sage-dark); }
+    .plan-banner { background: var(--coral-pale); border-radius: 8px; padding: 15px; display: flex; gap: 12px; align-items: flex-start; }
+    .plan-banner h3 { margin: 0; font-size: 14px; font-weight: 500; }
+    .plan-banner p { margin: 5px 0 0; color: #916458; font-size: 11px; line-height: 1.6; }
+    .plan-icon { color: var(--coral); }
+    .theme-day-card { background: var(--sage-dark); color: #fff; border-radius: 8px; padding: 16px; display: flex; align-items: flex-start; gap: 12px; }
+    .theme-day-card .theme-icon { width: 35px; height: 35px; border-radius: 9px; background: rgba(255,255,255,.14); display: grid; place-items: center; flex: 0 0 auto; }
+    .theme-day-card h3 { margin: 0; font-size: 16px; font-weight: 500; }
+    .theme-day-card p { margin: 6px 0 0; color: rgba(255,255,255,.72); font-size: 11px; line-height: 1.65; }
+    .theme-day-card .theme-edit { margin-left: auto; border: 1px solid rgba(255,255,255,.34); border-radius: 6px; background: transparent; color: #fff; padding: 6px 9px; font-size: 11px; white-space: nowrap; }
+    .must-do-list { display: grid; gap: 8px; }
+    .must-do-item { display: flex; align-items: center; gap: 10px; padding: 11px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
+    .must-do-item .must-copy { flex: 1; }
+    .must-do-item strong { display: block; font-size: 13px; font-weight: 500; }
+    .must-do-item small { display: block; color: var(--muted); font-size: 10px; margin-top: 4px; }
+    .must-do-item .must-time { color: var(--sage-dark); font: 11px "DM Sans", sans-serif; white-space: nowrap; }
+    .must-do-item .must-check { appearance: none; width: 20px; height: 20px; border: 1.5px solid #b8c4bc; border-radius: 50%; position: relative; flex: 0 0 auto; cursor: pointer; background: transparent; }
+    .must-do-item .must-check:checked { border-color: var(--sage-dark); background: var(--sage-dark); }
+    .must-do-item .must-check:checked::after { content: ""; position: absolute; left: 5px; top: 2px; width: 6px; height: 10px; border: solid #fff; border-width: 0 2px 2px 0; transform: rotate(45deg); }
+    .plan-item { width: 100%; text-align: left; color: var(--ink); font: inherit; cursor: pointer; }
+    .plan-item:hover { border-color: var(--sage); }
+    .plan-item.is-done { opacity: .62; }
+    .plan-item.is-done .plan-copy strong { text-decoration: line-through; text-decoration-thickness: 1px; }
+    .plan-check { appearance: none; width: 21px; height: 21px; border: 1.5px solid #b8c4bc; border-radius: 50%; background: transparent; position: relative; flex: 0 0 auto; cursor: pointer; }
+    .plan-check:checked { border-color: var(--sage-dark); background: var(--sage-dark); }
+    .plan-check:checked::after { content: ""; position: absolute; left: 6px; top: 3px; width: 6px; height: 10px; border: solid #fff; border-width: 0 2px 2px 0; transform: rotate(45deg); }
+    .plan-status { display: block; color: var(--sage-dark); font-size: 10px; margin-top: 4px; }
+    .plan-list { display: grid; gap: 8px; }
+    .plan-item { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 13px; display: flex; align-items: center; gap: 11px; }
+    .plan-item .plan-copy { flex: 1; }
+    .plan-item strong { font-size: 13px; font-weight: 500; display: block; }
+    .plan-item small { color: var(--muted); font-size: 10px; display: block; margin-top: 4px; }
+    .plan-item .time { color: var(--sage-dark); font-size: 11px; white-space: nowrap; }
+    .meal-grid { display: grid; gap: 10px; }
+    .meal-item { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 14px; display: flex; align-items: center; gap: 12px; }
+    .meal-icon { width: 38px; height: 38px; border-radius: 10px; display: grid; place-items: center; }
+    .meal-icon.breakfast { background: var(--yellow-pale); color: #92762c; }
+    .meal-icon.lunch { background: var(--sage-pale); color: var(--sage-dark); }
+    .meal-icon.dinner { background: var(--coral-pale); color: #ac5c4a; }
+    .meal-icon.snack { background: var(--blue-pale); color: #496b87; }
+    .meal-copy { flex: 1; }
+    .meal-copy strong { font-size: 13px; font-weight: 500; display: block; }
+    .meal-copy p { margin: 4px 0 0; font-size: 11px; color: var(--muted); }
+    .meal-add { border: 0; background: transparent; color: var(--sage-dark); padding: 4px; }
+    .meal-editable { cursor: pointer; }
+    .meal-editable:hover { border-color: var(--sage); }
+    .recipe-section { margin-top: 24px; }
+    .recipe-row { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 4px; }
+    .recipe { flex: 0 0 158px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 13px; color: var(--ink); text-align: left; font: inherit; cursor: pointer; transition: border-color .15s, transform .15s; }
+    .recipe:hover { border-color: var(--sage); transform: translateY(-1px); }
+    .recipe-top { display: flex; justify-content: space-between; align-items: center; }
+    .recipe-icon { color: var(--sage-dark); }
+    .recipe h3 { font-size: 13px; font-weight: 500; margin: 14px 0 6px; }
+    .recipe p { color: var(--muted); font-size: 10px; line-height: 1.5; margin: 0; }
+    .review-card { background: var(--ink); color: #fff; padding: 18px; border-radius: 8px; }
+    .review-card .review-tag { color: #c4ddd0; font-size: 11px; }
+    .review-card h3 { font-size: 18px; margin: 10px 0 7px; font-weight: 500; }
+    .review-card p { color: rgba(255,255,255,.72); font-size: 12px; line-height: 1.7; margin: 0; }
+    .review-card .review-actions { display: flex; gap: 8px; margin-top: 15px; }
+    .review-card .soft-button { background: rgba(255,255,255,.1); border-color: rgba(255,255,255,.2); color: #fff; }
+    .review-card .primary-button { background: #d8eee2; color: var(--sage-dark); }
+    .daily-feeling-card { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 15px; }
+    .daily-feeling-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+    .daily-feeling-head h3 { margin: 0; font-size: 14px; font-weight: 500; }
+    .daily-feeling-card p { margin: 9px 0 0; font-size: 12px; line-height: 1.75; white-space: pre-wrap; }
+    .daily-feeling-card .feeling-meta { color: var(--muted); font-size: 10px; margin-top: 5px; }
+    .history-controls { display: grid; grid-template-columns: 34px 1fr 34px; gap: 8px; align-items: center; margin: 15px 0 10px; }
+    .history-nav-button { width: 34px; height: 34px; border: 1px solid var(--line); border-radius: 7px; background: var(--surface); color: var(--muted); display: grid; place-items: center; }
+    .history-nav-button:hover { color: var(--sage-dark); border-color: var(--sage); }
+    .history-date-field { display: grid; gap: 4px; text-align: center; }
+    .history-date-field label { color: var(--muted); font-size: 10px; }
+    .history-date-field input { width: 100%; border: 0; background: transparent; color: var(--ink); text-align: center; font: 15px "DM Sans", "Noto Sans SC", sans-serif; }
+    .history-summary-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .history-summary { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 11px 9px; }
+    .history-summary span { color: var(--muted); font-size: 10px; display: block; }
+    .history-summary strong { display: block; margin-top: 6px; font: 18px "DM Sans", sans-serif; }
+    .history-summary em { display: block; color: var(--sage-dark); font-size: 9px; font-style: normal; margin-top: 3px; }
+    .history-section-title { display: flex; justify-content: space-between; align-items: baseline; margin: 20px 0 10px; }
+    .history-section-title h3 { margin: 0; font-size: 14px; font-weight: 500; }
+    .history-section-title span { color: var(--muted); font-size: 10px; }
+    .history-bars { display: grid; gap: 10px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 14px; }
+    .history-bar-row { display: grid; grid-template-columns: 55px 1fr 48px; gap: 8px; align-items: center; font-size: 10px; }
+    .history-bar-row label { color: var(--muted); }
+    .history-bar-track { height: 9px; border-radius: 5px; background: #e5ebe6; overflow: hidden; }
+    .history-bar-fill { height: 100%; border-radius: inherit; transition: width .25s ease; }
+    .history-bar-fill.work { background: var(--coral); } .history-bar-fill.growth { background: var(--blue); } .history-bar-fill.life { background: var(--sage); } .history-bar-fill.care { background: var(--yellow); }
+    .history-bar-row output { color: var(--muted); text-align: right; font: 10px "DM Sans", sans-serif; }
+    .history-record-list { display: grid; gap: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+    .history-record { display: flex; gap: 10px; align-items: center; padding: 11px 12px; border-bottom: 1px solid var(--line); }
+    .history-record:last-child { border-bottom: 0; }
+    .history-record-time { width: 44px; color: var(--muted); font: 10px "DM Sans", sans-serif; flex: 0 0 auto; }
+    .history-record-copy { flex: 1; min-width: 0; }
+    .history-record-copy strong { display: block; font-size: 12px; font-weight: 500; }
+    .history-record-copy small { display: block; color: var(--muted); font-size: 10px; margin-top: 3px; }
+    .history-record-tag { color: var(--sage-dark); font-size: 10px; }
+    .history-empty { color: var(--muted); font-size: 11px; text-align: center; padding: 18px 10px; }
+    .weekly-chart { height: 150px; display: flex; align-items: flex-end; justify-content: space-around; gap: 7px; padding: 13px 10px 7px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; }
+    .weekly-column { height: 100%; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 5px; }
+    .weekly-column .weekly-value { color: var(--muted); font: 9px "DM Sans", sans-serif; }
+    .weekly-column .weekly-bar { width: min(22px, 72%); min-height: 7px; background: #b9cfc1; border-radius: 5px 5px 2px 2px; }
+    .weekly-column.today .weekly-bar { background: var(--sage-dark); }
+    .weekly-column.today small { color: var(--sage-dark); font-weight: 500; }
+    .weekly-column small { color: var(--muted); font-size: 10px; }
+    .week-allocation-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; margin: 20px 0 10px; }
+    .week-allocation-head h3 { margin: 0; font-size: 16px; font-weight: 600; }
+    .week-allocation-head p { margin: 4px 0 0; color: var(--muted); font-size: 10px; }
+    .week-allocation-head span { color: var(--muted); font-size: 10px; white-space: nowrap; }
+    .week-allocation { display: grid; grid-template-columns: 152px 1fr; gap: 15px; align-items: center; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 15px; }
+    .week-donut-wrap { display: grid; justify-items: center; gap: 8px; }
+    .week-donut { width: 132px; height: 132px; border-radius: 50%; background: var(--line); display: grid; place-items: center; position: relative; }
+    .week-donut::after { content: ""; width: 78px; height: 78px; border-radius: 50%; background: var(--surface); position: absolute; }
+    .week-donut-center { position: relative; z-index: 1; text-align: center; display: grid; gap: 2px; }
+    .week-donut-center strong { font: 500 18px "DM Sans", sans-serif; }
+    .week-donut-center span { color: var(--muted); font-size: 9px; }
+    .week-donut-caption { margin: 0; color: var(--muted); font-size: 9px; text-align: center; line-height: 1.5; }
+    .week-category-list { display: grid; gap: 8px; min-width: 0; }
+    .week-category-button { width: 100%; display: grid; grid-template-columns: 9px 1fr auto; gap: 8px; align-items: center; padding: 3px 0; border: 0; background: transparent; color: var(--ink); text-align: left; }
+    .week-category-button:hover .week-category-name { color: var(--sage-dark); }
+    .week-category-button[aria-pressed="true"] .week-category-name { font-weight: 600; color: var(--sage-dark); }
+    .week-category-swatch { width: 8px; height: 8px; border-radius: 2px; }
+    .week-category-copy { min-width: 0; }
+    .week-category-name { display: block; font-size: 11px; }
+    .week-category-meta { display: flex; align-items: center; gap: 6px; margin-top: 3px; }
+    .week-category-track { height: 5px; flex: 1; border-radius: 3px; background: #e7ebe5; overflow: hidden; }
+    .week-category-fill { height: 100%; border-radius: inherit; }
+    .week-category-value { color: var(--muted); font: 10px "DM Sans", sans-serif; white-space: nowrap; }
+    .week-category-share { color: var(--sage-dark); font: 10px "DM Sans", sans-serif; white-space: nowrap; }
+    .week-analysis-note { display: flex; align-items: flex-start; gap: 9px; margin-top: 10px; padding: 11px 12px; background: var(--sage-pale); border-radius: 8px; }
+    .week-analysis-note i { color: var(--sage-dark); flex: 0 0 auto; margin-top: 1px; }
+    .week-analysis-note strong { display: block; font-size: 12px; font-weight: 500; }
+    .week-analysis-note p { margin: 4px 0 0; color: #496b5d; font-size: 10px; line-height: 1.6; }
+    .week-filter-tabs { display: flex; flex-wrap: wrap; gap: 7px; margin: 0 0 9px; }
+    .week-filter-tab { border: 1px solid var(--line); border-radius: 14px; background: transparent; color: var(--muted); padding: 5px 9px; font-size: 10px; }
+    .week-filter-tab:hover, .week-filter-tab[aria-pressed="true"] { border-color: var(--sage); background: var(--sage-pale); color: var(--sage-dark); }
+    .week-activity-list { display: grid; gap: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+    .week-activity-row { display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; gap: 9px; align-items: center; padding: 10px 12px; border-bottom: 1px solid var(--line); }
+    .week-activity-row:last-child { border-bottom: 0; }
+    .week-activity-rank { color: var(--muted); font: 10px "DM Sans", sans-serif; text-align: center; }
+    .week-activity-copy { min-width: 0; }
+    .week-activity-copy strong { display: block; font-size: 12px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .week-activity-copy small { display: block; color: var(--muted); font-size: 10px; margin-top: 3px; }
+    .week-activity-time { color: var(--sage-dark); font: 500 12px "DM Sans", sans-serif; white-space: nowrap; }
+    .week-activity-empty { color: var(--muted); font-size: 11px; text-align: center; padding: 18px 10px; }
+    .weekly-column { border: 0; background: transparent; color: inherit; padding: 0; cursor: pointer; }
+    .weekly-column:hover .weekly-bar { background: var(--sage-dark); }
+    .week-timeline-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; margin: 20px 0 10px; }
+    .week-timeline-head h3 { margin: 0; font-size: 16px; font-weight: 600; }
+    .week-timeline-head p { margin: 4px 0 0; color: var(--muted); font-size: 10px; }
+    .week-timeline-scroll { overflow-x: auto; padding-bottom: 3px; }
+    .week-timeline { min-width: 420px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 12px 10px 10px; }
+    .week-timeline-scale { display: grid; grid-template-columns: 48px 1fr; gap: 8px; padding-bottom: 6px; }
+    .week-timeline-hours { display: flex; justify-content: space-between; color: var(--muted); font: 9px "DM Sans", sans-serif; padding: 0 1px; }
+    .week-timeline-day { display: grid; grid-template-columns: 48px 1fr; gap: 8px; min-height: 34px; border-top: 1px solid #edf0eb; }
+    .week-timeline-label { border: 0; background: transparent; padding: 8px 0 0; color: var(--muted); font-size: 10px; text-align: left; }
+    .week-timeline-label strong { display: block; color: var(--ink); font-size: 11px; font-weight: 500; }
+    .week-timeline-label small { display: block; margin-top: 2px; font: 9px "DM Sans", sans-serif; }
+    .week-timeline-lane { position: relative; min-height: 33px; background-image: linear-gradient(to right, transparent calc(25% - 1px), #edf0eb 25%, transparent calc(25% + 1px), transparent calc(50% - 1px), #edf0eb 50%, transparent calc(50% + 1px), transparent calc(75% - 1px), #edf0eb 75%, transparent calc(75% + 1px)); }
+    .week-timeline-day.today .week-timeline-label strong { color: var(--sage-dark); }
+    .week-timeline-day.today .week-timeline-lane { background-color: #f7faf7; }
+    .week-timeline-block { position: absolute; height: 20px; border-radius: 4px; padding: 3px 6px; font-size: 9px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border-left: 3px solid currentColor; }
+    .week-timeline-block.sage { background: var(--sage-pale); color: var(--sage-dark); }
+    .week-timeline-block.blue { background: var(--blue-pale); color: #496b87; }
+    .week-timeline-block.coral { background: var(--coral-pale); color: #ac5c4a; }
+    .week-timeline-block.yellow { background: var(--yellow-pale); color: #92762c; }
+    .week-timeline-empty { color: #a1aaa5; font-size: 10px; padding: 9px 0; }
+    .week-goals-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin: 20px 0 10px; }
+    .week-goals-head h3 { margin: 0; font-size: 16px; font-weight: 600; }
+    .week-goals-head span { color: var(--muted); font-size: 10px; }
+    .week-goal-list { display: grid; gap: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+    .week-goal-row { display: grid; grid-template-columns: 24px minmax(0, 1fr) 48px; gap: 9px; align-items: center; padding: 11px 12px; border-bottom: 1px solid var(--line); }
+    .week-goal-row:last-child { border-bottom: 0; }
+    .week-goal-index { width: 21px; height: 21px; border-radius: 6px; display: grid; place-items: center; background: #eef1eb; color: var(--muted); font: 10px "DM Sans", sans-serif; }
+    .week-goal-copy { min-width: 0; }
+    .week-goal-copy strong { display: block; font-size: 11px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .week-goal-copy small { display: block; color: var(--muted); font-size: 9px; margin-top: 3px; }
+    .week-goal-track { height: 5px; margin-top: 7px; border-radius: 3px; background: #e7ebe5; overflow: hidden; }
+    .week-goal-fill { height: 100%; border-radius: inherit; background: var(--sage); }
+    .week-goal-progress { color: var(--sage-dark); font: 500 12px "DM Sans", sans-serif; text-align: right; }
+    .week-goal-progress.done { color: var(--sage-dark); }
+    .skin-tracker { margin-top: 20px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 14px; }
+    .skin-tracker-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+    .skin-tracker-head h3 { margin: 0; font-size: 16px; font-weight: 600; }
+    .skin-tracker-head p { margin: 4px 0 0; color: var(--muted); font-size: 10px; line-height: 1.5; }
+    .skin-tracker-head strong { color: var(--sage-dark); font: 500 18px "DM Sans", sans-serif; white-space: nowrap; }
+    .skin-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; margin-top: 13px; }
+    .skin-day { border: 1px solid var(--line); border-radius: 6px; background: var(--paper); color: var(--muted); padding: 6px 2px; font-size: 9px; text-align: center; }
+    .skin-day strong { display: block; color: var(--ink); font: 11px "DM Sans", sans-serif; margin-top: 3px; }
+    .skin-day small { display: block; margin-top: 3px; font: 9px "DM Sans", sans-serif; }
+    .skin-day.active { border-color: var(--sage-dark); background: var(--sage-pale); color: var(--sage-dark); }
+    .skin-day.recorded strong { color: var(--sage-dark); }
+    .skin-dimensions { display: grid; gap: 9px; margin-top: 14px; }
+    .skin-dimension { display: grid; grid-template-columns: 64px minmax(0, 1fr) 30px; gap: 8px; align-items: center; }
+    .skin-dimension label { font-size: 10px; color: var(--ink); }
+    .skin-dimension input[type="number"] { width: 100%; background: var(--paper); border: 1px solid var(--line); border-radius: 6px; padding: 7px 8px; color: var(--ink); font: 12px "DM Sans", sans-serif; }
+    .skin-score { color: var(--sage-dark); font: 500 12px "DM Sans", sans-serif; text-align: right; }
+    .skin-save-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 12px; }
+    .skin-save-row small { color: var(--muted); font-size: 9px; line-height: 1.4; }
+    .skin-save-row .primary-button { padding: 8px 11px; }
+    .skin-radar { position: relative; width: 142px; height: 142px; margin: 15px auto 5px; border-radius: 50%; background: repeating-radial-gradient(circle, transparent 0 20px, #e9ede8 21px 22px), linear-gradient(30deg, transparent 49.5%, #e9ede8 50%, transparent 50.5%), linear-gradient(90deg, transparent 49.5%, #e9ede8 50%, transparent 50.5%), linear-gradient(150deg, transparent 49.5%, #e9ede8 50%, transparent 50.5%); }
+    .skin-radar::before { content: ""; position: absolute; inset: 0; background: rgba(123,154,136,.34); border: 2px solid var(--sage-dark); clip-path: polygon(var(--skin-p1, 50% 5%), var(--skin-p2, 93% 35%), var(--skin-p3, 76% 85%), var(--skin-p4, 24% 85%), var(--skin-p5, 7% 35%)); transition: clip-path .2s ease; }
+    .skin-radar-label { position: absolute; color: var(--muted); font-size: 9px; white-space: nowrap; }
+    .skin-radar-label.top { top: -14px; left: 50%; transform: translateX(-50%); } .skin-radar-label.right { right: -38px; top: 39%; } .skin-radar-label.bottom-right { right: -29px; bottom: 2px; } .skin-radar-label.bottom-left { left: -29px; bottom: 2px; } .skin-radar-label.left { left: -38px; top: 39%; }
+    .skin-note { margin: 11px 0 0; padding: 9px 10px; border-radius: 6px; background: #f5f7f2; color: var(--muted); font-size: 9px; line-height: 1.55; }
+    .week-observation-list { display: grid; gap: 8px; margin-top: 14px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 12px; }
+    .week-observation { padding: 10px; border: 1px solid var(--line); border-radius: 7px; background: var(--paper); }
+    .week-observation-head { display: flex; align-items: center; gap: 7px; }
+    .week-observation-icon { width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; font-size: 12px; }
+    .week-observation-icon.green { background: #dff0df; } .week-observation-icon.yellow { background: #fff0bf; } .week-observation-icon.blue { background: #dceaf8; } .week-observation-icon.coral { background: #fae1d9; } .week-observation-icon.purple { background: #eee2f7; } .week-observation-icon.sage { background: var(--sage-pale); }
+    .week-observation-head label { color: var(--ink); font-size: 11px; font-weight: 500; }
+    .week-observation textarea { width: 100%; min-height: 54px; margin-top: 7px; resize: vertical; background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 8px; color: var(--ink); font-size: 11px; line-height: 1.55; }
+    .week-observation textarea:focus { border-color: var(--sage); outline: 0; }
+    .week-next-action { margin-top: 14px; padding: 13px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; }
+    .week-next-action-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .week-next-action-head h3 { margin: 0; font-size: 14px; font-weight: 500; }
+    .week-next-action-input { display: grid; grid-template-columns: minmax(0, 1fr) 105px 58px; gap: 7px; margin-top: 10px; }
+    .week-next-action-input input { min-width: 0; background: var(--paper); border: 1px dashed var(--line); border-radius: 7px; padding: 9px; color: var(--ink); font-size: 11px; }
+    .week-next-action-input input[type="date"] { font: 10px "DM Sans", sans-serif; }
+    .week-next-action-input select { background: var(--paper); border: 1px solid var(--line); border-radius: 7px; padding: 7px 4px; color: var(--ink); font-size: 10px; }
+    .week-next-action-input button { border: 0; border-radius: 7px; background: var(--sage-dark); color: #fff; font-size: 11px; }
+    .week-next-action-list { display: grid; gap: 6px; margin-top: 9px; }
+    .week-next-action-row { display: flex; align-items: center; gap: 7px; padding: 7px 8px; background: var(--paper); border-radius: 6px; font-size: 11px; }
+    .week-next-action-row.done { color: var(--muted); text-decoration: line-through; }
+    .week-next-action-row input { accent-color: var(--sage-dark); }
+    .week-next-action-row small { margin-left: auto; color: var(--muted); font-size: 9px; }
+    .week-calendar-scroll { overflow-x: auto; padding-bottom: 3px; }
+    .week-calendar { min-width: 680px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 10px 8px 8px; }
+    .week-calendar-header, .week-calendar-body { display: grid; grid-template-columns: 44px repeat(7, minmax(82px, 1fr)); }
+    .week-calendar-header { border-bottom: 1px solid var(--line); }
+    .week-calendar-header > div { min-height: 43px; padding: 5px 4px; text-align: center; color: var(--muted); font-size: 9px; border-left: 1px solid #edf0eb; }
+    .week-calendar-header > div:first-child { border-left: 0; }
+    .week-calendar-header-day { min-height: 43px; padding: 5px 4px; border: 0; border-left: 1px solid #edf0eb; background: transparent; color: var(--muted); text-align: center; font-size: 9px; }
+    .week-calendar-header-day:hover { background: var(--sage-pale); }
+    .week-calendar-header strong { display: block; color: var(--ink); font-size: 11px; font-weight: 500; }
+    .week-calendar-header small { display: block; margin-top: 3px; font: 9px "DM Sans", sans-serif; }
+    .week-calendar-header .today strong { color: var(--sage-dark); }
+    .week-calendar-body { height: 720px; position: relative; background: repeating-linear-gradient(to bottom, transparent 0, transparent 39px, #edf0eb 40px); }
+    .week-calendar-time { position: relative; color: var(--muted); font: 9px "DM Sans", sans-serif; border-right: 1px solid var(--line); }
+    .week-calendar-time span { position: absolute; left: 0; transform: translateY(-50%); background: var(--surface); padding-right: 3px; }
+    .week-calendar-day { position: relative; border-left: 1px solid #edf0eb; background: rgba(251,250,247,.3); }
+    .week-calendar-day.today { background: rgba(232,239,234,.28); }
+    .week-calendar-block { position: absolute; min-width: 0; height: 30px; border-radius: 5px; padding: 4px 5px; font-size: 9px; line-height: 1.25; overflow: hidden; text-overflow: ellipsis; border-left: 3px solid currentColor; z-index: 1; }
+    .week-calendar-block.sage { background: var(--sage-pale); color: var(--sage-dark); } .week-calendar-block.blue { background: var(--blue-pale); color: #496b87; } .week-calendar-block.coral { background: var(--coral-pale); color: #ac5c4a; } .week-calendar-block.yellow { background: var(--yellow-pale); color: #92762c; }
+    .month-index-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 10px; margin: 20px 0 10px; }
+    .month-index-head h3 { margin: 0; font-size: 16px; font-weight: 600; }
+    .month-index-head p { margin: 4px 0 0; color: var(--muted); font-size: 10px; }
+    .month-index-head span { color: var(--muted); font-size: 10px; }
+    .month-action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .month-action-card { background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--sage); border-radius: 7px; padding: 10px; }
+    .month-action-card.coral { border-left-color: var(--coral); } .month-action-card.blue { border-left-color: var(--blue); } .month-action-card.yellow { border-left-color: var(--yellow); } .month-action-card.purple { border-left-color: #9a78d5; } .month-action-card.sage { border-left-color: var(--sage); } .month-action-card.ink { border-left-color: var(--ink); }
+    .month-action-card strong { display: block; font-size: 11px; font-weight: 500; }
+    .month-action-card small { display: block; margin-top: 3px; color: var(--muted); font-size: 9px; }
+    .month-action-card textarea { width: 100%; min-height: 48px; margin-top: 8px; resize: vertical; background: var(--paper); border: 1px solid var(--line); border-radius: 6px; padding: 7px; color: var(--ink); font-size: 10px; line-height: 1.5; }
+    .month-action-card textarea:focus, .month-summary-card textarea:focus { border-color: var(--sage); outline: 0; }
+    .month-summary-card { margin-top: 8px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 12px; }
+    .month-summary-card h3 { margin: 0; font-size: 13px; font-weight: 500; }
+    .month-summary-card textarea { width: 100%; min-height: 58px; margin-top: 8px; resize: vertical; background: var(--paper); border: 1px solid var(--line); border-radius: 6px; padding: 8px; color: var(--ink); font-size: 10px; line-height: 1.55; }
+    @media (max-width: 365px) { .month-action-grid { grid-template-columns: 1fr; } }
+    @media (max-width: 365px) {
+      .week-allocation { grid-template-columns: 1fr; }
+      .week-donut-wrap { grid-template-columns: 132px 1fr; display: grid; align-items: center; text-align: left; }
+      .week-donut-caption { text-align: left; }
+    }
+    .bar-chart { display: grid; gap: 12px; }
+    .bar-row { display: grid; grid-template-columns: 50px 1fr 42px; gap: 8px; align-items: center; font-size: 11px; }
+    .bar-row label { color: var(--muted); }
+    .bar-track { height: 8px; border-radius: 4px; background: #e4e9e3; overflow: hidden; }
+    .bar-value { height: 100%; border-radius: inherit; }
+    .bar-value.sage { background: var(--sage); width: 72%; } .bar-value.blue { background: var(--blue); width: 42%; } .bar-value.coral { background: var(--coral); width: 28%; } .bar-value.yellow { background: var(--yellow); width: 19%; }
+    .bar-row span { text-align: right; color: var(--muted); font-family: "DM Sans", sans-serif; }
+    .profile-head { display: flex; align-items: center; gap: 13px; padding: 7px 0 19px; }
+    .avatar { width: 48px; height: 48px; border-radius: 50%; background: #d7e5db; color: var(--sage-dark); display: grid; place-items: center; font-size: 18px; font-weight: 500; overflow: hidden; background-position: center; background-size: cover; background-repeat: no-repeat; }
+    .avatar.has-image { background-color: var(--surface); }
+    .avatar.has-image svg { display: none; }
+    .profile-head h2 { font-size: 18px; font-weight: 500; margin: 0; }
+    .profile-head p { font-size: 11px; color: var(--muted); margin: 4px 0 0; }
+    .profile-edit { align-self: flex-start; margin-left: auto; border: 0; background: transparent; color: var(--sage-dark); font-size: 11px; padding: 5px 0; }
+    .settings-intro { margin: -7px 0 18px; color: var(--muted); font-size: 12px; line-height: 1.6; }
+    .setting-list { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+    .setting-row { width: 100%; border: 0; border-bottom: 1px solid var(--line); background: transparent; padding: 14px 13px; display: flex; align-items: center; gap: 11px; text-align: left; color: var(--ink); }
+    .setting-row:last-child { border-bottom: 0; }
+    .setting-row svg { color: var(--muted); }
+    .setting-row span { flex: 1; font-size: 13px; }
+    .setting-row small { color: var(--muted); font-size: 10px; }
+    .review-tabs { display: flex; gap: 7px; margin: 18px 0 13px; border-bottom: 1px solid var(--line); }
+    .review-tab { border: 0; border-bottom: 2px solid transparent; background: transparent; color: var(--muted); padding: 8px 4px 9px; font-size: 12px; }
+    .review-tab.active { border-bottom-color: var(--sage-dark); color: var(--sage-dark); }
+    .review-panel { display: none; }
+    .review-panel.active { display: block; }
+    .review-purpose { margin: -2px 0 0; color: var(--muted); font-size: 11px; line-height: 1.6; }
+    .period-toolbar { display: grid; grid-template-columns: 34px 1fr 34px; gap: 8px; align-items: center; margin: 17px 0 10px; }
+    .period-toolbar h3 { margin: 0; text-align: center; font-size: 14px; font-weight: 500; }
+    .period-nav { width: 34px; height: 34px; border: 1px solid var(--line); border-radius: 7px; background: var(--surface); color: var(--muted); display: grid; place-items: center; }
+    .period-nav:hover { color: var(--sage-dark); border-color: var(--sage); }
+    .review-template { margin-top: 14px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 14px; }
+    .review-template-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+    .review-template-head h3 { margin: 0; font-size: 14px; font-weight: 500; }
+    .review-template-head p { margin: 4px 0 0; color: var(--muted); font-size: 10px; line-height: 1.5; }
+    .review-save-state { color: var(--sage-dark); font-size: 10px; white-space: nowrap; }
+    .review-template-fields { display: grid; gap: 10px; margin-top: 13px; }
+    .review-template-field { display: grid; gap: 5px; }
+    .review-template-field label { color: var(--muted); font-size: 10px; }
+    .review-template-field textarea { width: 100%; min-height: 54px; resize: vertical; background: var(--paper); border: 1px solid var(--line); border-radius: 7px; padding: 8px 9px; color: var(--ink); font-size: 11px; line-height: 1.55; }
+    .review-template-field textarea:focus { border-color: var(--sage); outline: 0; }
+    .review-template-footer { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 12px; }
+    .review-template-footer small { color: var(--muted); font-size: 9px; line-height: 1.4; }
+    .review-template-footer .primary-button { padding: 8px 11px; }
+    .review-trace-list { display: grid; gap: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+    .review-trace-row { width: 100%; display: grid; grid-template-columns: 54px minmax(0, 1fr) auto; gap: 9px; align-items: center; padding: 10px 11px; border: 0; border-bottom: 1px solid var(--line); background: transparent; color: var(--ink); text-align: left; }
+    .review-trace-row:last-child { border-bottom: 0; }
+    .review-trace-row:hover { background: var(--paper); }
+    .review-trace-date { color: var(--muted); font: 10px "DM Sans", sans-serif; }
+    .review-trace-copy { min-width: 0; }
+    .review-trace-copy strong { display: block; font-size: 11px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .review-trace-copy small { display: block; margin-top: 3px; color: var(--muted); font-size: 9px; }
+    .review-trace-state { color: var(--sage-dark); font-size: 9px; white-space: nowrap; }
+    .month-summary-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .month-summary { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 11px 9px; }
+    .month-summary span { display: block; color: var(--muted); font-size: 10px; }
+    .month-summary strong { display: block; margin-top: 6px; font: 500 18px "DM Sans", sans-serif; }
+    .month-summary em { display: block; margin-top: 3px; color: var(--sage-dark); font-size: 9px; font-style: normal; }
+    .month-week-list { display: grid; gap: 8px; }
+    .month-week-row { display: grid; grid-template-columns: 58px minmax(0, 1fr) auto; gap: 9px; align-items: center; padding: 11px 12px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; color: var(--ink); text-align: left; }
+    .month-week-row:hover { border-color: var(--sage); }
+    .month-week-label { color: var(--muted); font-size: 10px; }
+    .month-week-copy { min-width: 0; }
+    .month-week-copy strong { display: block; font-size: 12px; font-weight: 500; }
+    .month-week-copy small { display: block; margin-top: 3px; color: var(--muted); font-size: 9px; }
+    .month-week-state { color: var(--sage-dark); font-size: 9px; white-space: nowrap; }
+    .month-empty { padding: 18px 10px; color: var(--muted); font-size: 11px; text-align: center; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; }
+    .review-insight-list { display: grid; gap: 8px; margin-top: 13px; }
+    .review-insight { display: flex; align-items: flex-start; gap: 9px; padding: 11px 12px; background: var(--surface); border-bottom: 1px solid var(--line); }
+    .review-insight i { color: var(--sage-dark); flex: 0 0 auto; margin-top: 1px; }
+    .review-insight strong { display: block; font-size: 12px; font-weight: 500; }
+    .review-insight p { color: var(--muted); font-size: 11px; line-height: 1.6; margin: 4px 0 0; }
+    .calendar-toolbar { display: flex; align-items: center; justify-content: space-between; margin: 18px 0 13px; }
+    .calendar-toolbar h3 { margin: 0; font-size: 15px; font-weight: 500; }
+    .calendar-actions { display: flex; gap: 5px; }
+    .calendar-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 5px; }
+    .calendar-key { display: flex; gap: 12px; margin: 0 0 10px; color: var(--muted); font-size: 10px; }
+    .calendar-key span { display: inline-flex; align-items: center; gap: 5px; }
+    .calendar-key i { width: 7px; height: 7px; border-radius: 2px; display: inline-block; }
+    .calendar-key .key-done { background: var(--sage); }
+    .calendar-key .key-plan { background: var(--coral); }
+    .calendar-day { min-height: 100px; width: 100%; background: var(--surface); border: 1px solid var(--line); border-radius: 7px; padding: 8px 5px; color: var(--ink); text-align: left; cursor: pointer; transition: border-color .15s, transform .15s; }
+    .calendar-day:hover { border-color: var(--sage); transform: translateY(-1px); }
+    .calendar-day.today { border-color: var(--sage); background: var(--sage-pale); }
+    .calendar-day .day-name { color: var(--muted); font-size: 10px; }
+    .calendar-day .day-number { display: block; margin-top: 4px; font: 15px "DM Sans", sans-serif; }
+    .calendar-day.today .day-number { color: var(--sage-dark); font-weight: 500; }
+    .calendar-dot { display: block; margin-top: 8px; font-size: 9px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .calendar-dot.done { color: var(--sage-dark); }
+    .calendar-dot.future { color: var(--coral); }
+    .calendar-dot.empty { color: #a1aaa5; }
+    .calendar-list { display: grid; gap: 8px; }
+    .calendar-list-item { display: flex; align-items: center; gap: 10px; width: 100%; padding: 12px; border: 0; border-bottom: 1px solid var(--line); background: transparent; color: var(--ink); text-align: left; cursor: pointer; }
+    .calendar-list-item:hover { background: var(--surface); }
+    .calendar-list-date { width: 43px; color: var(--muted); font-size: 10px; line-height: 1.4; flex: 0 0 auto; }
+    .calendar-list-copy { flex: 1; }
+    .calendar-list-copy strong { display: block; font-size: 12px; font-weight: 500; }
+    .calendar-list-copy p { margin: 4px 0 0; color: var(--muted); font-size: 10px; }
+    .bottom-nav {
+      height: 76px; background: rgba(251,250,247,.96); border-top: 1px solid var(--line);
+      position: absolute; bottom: 0; left: 0; right: 0; display: grid; grid-template-columns: repeat(5, 1fr); z-index: 4;
+      padding: 8px 7px 11px;
+    }
+    .nav-item { border: 0; background: transparent; color: #8a9691; display: flex; flex-direction: column; gap: 4px; align-items: center; justify-content: center; font-size: 10px; position: relative; }
+    .nav-item.active { color: var(--sage-dark); }
+    .nav-item.active::before { content: ""; width: 24px; height: 3px; border-radius: 3px; background: var(--sage-dark); position: absolute; top: -8px; }
+    .fab {
+      position: absolute; right: 20px; bottom: 91px; z-index: 5; width: 55px; height: 55px; border: 0; border-radius: 50%;
+      background: var(--coral); color: #fff; display: grid; place-items: center; box-shadow: 0 12px 24px rgba(169, 92, 71, .25); transition: transform .15s;
+    }
+    .fab:hover { transform: translateY(-2px) rotate(3deg); }
+    .modal-layer { position: fixed; inset: 0; background: rgba(22,37,35,.42); display: none; align-items: flex-end; z-index: 10; }
+    .modal-layer.open { display: flex; }
+    .modal {
+      width: min(100%, 480px); margin: 0 auto; background: var(--paper); border-radius: 18px 18px 0 0; padding: 18px 20px 25px;
+      max-height: 88vh; overflow-y: auto; animation: sheet .22s ease-out;
+    }
+    @keyframes sheet { from { transform: translateY(20px); opacity: .2; } to { transform: translateY(0); opacity: 1; } }
+    .modal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 17px; }
+    .modal-head h2 { font-size: 17px; font-weight: 600; margin: 0; }
+    .close-button { border: 0; background: transparent; color: var(--muted); width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; }
+    .close-button:hover { background: var(--surface); }
+    .activity-options { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .activity-section-label { grid-column: 1 / -1; color: var(--muted); font-size: 11px; margin: 5px 0 -1px; }
+    .activity-section-label:first-child { margin-top: 0; }
+    .activity-option { border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 8px; padding: 12px 7px; min-height: 68px; display: flex; flex-direction: column; gap: 7px; align-items: center; justify-content: center; font-size: 11px; }
+    .activity-option:hover { border-color: var(--sage); background: var(--sage-pale); }
+    .activity-option svg { color: var(--sage-dark); }
+    .form-stack { display: grid; gap: 12px; }
+    .form-field { display: grid; gap: 6px; }
+    .form-field label { font-size: 11px; color: var(--muted); }
+    .form-field input, .form-field textarea, .form-field select { width: 100%; background: var(--surface); border: 1px solid var(--line); border-radius: 7px; padding: 10px 11px; color: var(--ink); }
+    .form-field textarea { min-height: 90px; resize: vertical; line-height: 1.6; }
+    .file-input { width: 100%; color: var(--muted); font-size: 11px; }
+    .file-input::file-selector-button { border: 1px solid var(--line); border-radius: 7px; background: var(--surface); color: var(--ink); padding: 8px 10px; margin-right: 8px; cursor: pointer; }
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+    .modal-footer { display: flex; justify-content: flex-end; gap: 8px; margin-top: 17px; }
+    .voice-box { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 13px; display: flex; gap: 10px; align-items: center; }
+    .voice-button { width: 42px; height: 42px; border: 0; border-radius: 50%; background: var(--coral-pale); color: var(--coral); display: grid; place-items: center; flex: 0 0 auto; }
+    .voice-button.listening { background: var(--coral); color: #fff; animation: pulse 1.1s infinite; }
+    @keyframes pulse { 50% { box-shadow: 0 0 0 7px rgba(222,132,110,.18); } }
+    .voice-copy strong { display: block; font-size: 12px; font-weight: 500; }
+    .voice-copy p { color: var(--muted); font-size: 10px; margin: 4px 0 0; }
+    .ai-output { display: none; margin-top: 14px; background: var(--sage-pale); border-radius: 8px; padding: 14px; }
+    .ai-output.show { display: block; }
+    .ai-output h3 { font-size: 13px; font-weight: 500; margin: 0 0 9px; }
+    .ai-output p { font-size: 11px; line-height: 1.75; margin: 6px 0; color: #496b5d; }
+    .ai-output strong { color: var(--sage-dark); }
+    .toast { position: fixed; left: 50%; bottom: 93px; transform: translateX(-50%) translateY(10px); background: var(--ink); color: #fff; padding: 9px 13px; border-radius: 7px; font-size: 11px; opacity: 0; pointer-events: none; transition: .22s; z-index: 30; white-space: nowrap; }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    @media (min-width: 640px) {
+      body { padding: 26px 0; }
+      .app-shell { min-height: calc(100vh - 52px); border-radius: 18px; }
+      .bottom-nav { border-radius: 0 0 18px 18px; }
+    }
+    @media (max-width: 365px) {
+      main { padding-left: 16px; padding-right: 16px; }
+      .topbar { padding-left: 17px; padding-right: 17px; }
+      .hero-title { font-size: 25px; }
+      .activity-options { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell" id="app">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true"><i data-lucide="sunrise" style="width:17px;height:17px"></i></div>
+        <div><h1>拾光</h1><small>记录 · 复盘 · 坚持</small></div>
+      </div>
+      <div class="top-actions">
+        <button class="icon-button" id="openManualTop" aria-label="手动补录"><i data-lucide="square-pen"></i></button>
+        <button class="icon-button" id="openSettings" aria-label="打开设置"><i data-lucide="sliders-horizontal"></i></button>
+      </div>
+    </header>
+
+    <main>
+      <section class="view active" id="view-today" aria-labelledby="today-title">
+        <p class="eyebrow">星期四 · 8 月 20 日</p>
+        <h2 class="hero-title" id="today-title">早安，<span>今天也慢慢来。</span></h2>
+        <div class="day-row">
+          <button class="location-button is-loading" id="locationButton" type="button" aria-live="polite" aria-label="获取当前位置与天气"><i data-lucide="locate-fixed" style="width:14px;height:14px"></i><span id="locationWeather">正在获取位置与天气…</span></button>
+          <div class="mood-chip"><i data-lucide="leaf" style="width:13px;height:13px"></i> 今日状态 · 平稳</div>
+        </div>
+
+        <div class="summary-strip">
+          <div class="summary-strip-head"><label>今天已记录</label><strong id="recordedTotal">7h 35m</strong></div>
+          <div class="progress-track" role="progressbar" aria-label="今日时间记录进度" aria-valuenow="68" aria-valuemin="0" aria-valuemax="100"><div class="progress-fill" id="recordProgress"></div></div>
+          <div class="summary-footer"><span>成长投入 1h 42m</span><span>计划完成 4 / 6</span></div>
+        </div>
+
+        <div class="section-title"><h2>正在进行</h2><div class="section-tools"><button class="soft-button" id="openManual"><i data-lucide="plus" style="width:14px;height:14px"></i>手动补录</button><button class="soft-button" id="openStart"><i data-lucide="play" style="width:14px;height:14px"></i>开始活动</button></div></div>
+        <div class="active-stack" id="activeStack"><div class="active-empty">暂时没有进行中的活动。点击“开始活动”后，这里会显示正在记录的项目。</div></div>
+
+        <div class="section-title"><h2>今天的时间线</h2><button class="text-button" id="jumpReview">查看分析 →</button></div>
+        <div class="timeline" aria-label="今日时间线">
+          <div class="timeline-scale"><span>06:00</span><span>10:00</span><span>14:00</span><span>18:00</span><span>22:00</span></div>
+          <div class="timeline-sample" id="timelineSample">
+            <div class="timeline-row"><span class="timeline-time">06:40</span><div class="timeline-lane"><div class="time-block yellow">晨间准备</div></div></div>
+            <div class="timeline-row"><span class="timeline-time">07:52</span><div class="timeline-lane"><div class="time-block sage">通勤</div><div class="time-block blue">阅读</div></div></div>
+            <div class="timeline-row"><span class="timeline-time">09:00</span><div class="timeline-lane"><div class="time-block coral">工作 · 会议</div></div></div>
+            <div class="timeline-row"><span class="timeline-time">12:20</span><div class="timeline-lane"><div class="time-block sage">午餐 + 散步</div></div></div>
+          </div>
+          <div class="timeline-records" id="timelineRecords" aria-live="polite"></div>
+          <div class="timeline-legend"><span class="legend-item"><i class="legend-dot dot-sage"></i>生活</span><span class="legend-item"><i class="legend-dot dot-blue"></i>成长</span><span class="legend-item"><i class="legend-dot dot-coral"></i>工作</span><span class="legend-item"><i class="legend-dot dot-yellow"></i>自我照顾</span></div>
+        </div>
+
+        <div class="section-title"><h2>今天想照顾的自己</h2><span class="eyebrow" style="margin:0">4 / 6 已完成</span></div>
+        <div class="habit-list">
+          <div class="habit-row"><input class="habit-check" type="checkbox" id="habit1" checked><label for="habit1">早间护肤</label><small>已完成 07:05</small></div>
+          <div class="habit-row"><input class="habit-check" type="checkbox" id="habit2" checked><label for="habit2">体态激活 8 分钟</label><small>已完成 07:18</small></div>
+          <div class="habit-row"><input class="habit-check" type="checkbox" id="habit3"><label for="habit3">力量训练</label><small>建议 18:30</small></div>
+          <div class="habit-row"><input class="habit-check" type="checkbox" id="habit4"><label for="habit4">晚间护肤 + 拉伸</label><small>建议 22:00</small></div>
+        </div>
+      </section>
+
+      <section class="view" id="view-plan" aria-labelledby="plan-title">
+        <p class="eyebrow">计划与节奏</p><h2 class="hero-title" id="plan-title">给重要的事，留一点位置。</h2>
+        <div class="section-title"><h2>今天的主题</h2><button class="text-button" id="editPlan">编辑计划 →</button></div>
+        <div class="theme-day-card"><div class="theme-icon"><i data-lucide="heart-pulse"></i></div><div><h3 id="themeDayName">周四 · 温柔修复日</h3><p id="themeDayDescription">忙碌中留一点空间给身体：完成体态舒展、轻量训练和晚间放松。</p></div><button class="theme-edit" id="editTheme">更换</button></div>
+        <div class="section-title"><h2>今天必做 3 件事</h2><span class="eyebrow" id="mustDoCount" style="margin:0">1 / 3 已完成</span></div>
+        <div class="must-do-list" id="mustDoList">
+          <div class="must-do-item"><input class="must-check" type="checkbox" id="must1" checked><label class="must-copy" for="must1"><strong>好好吃一顿晚餐</strong><small>照顾身体 · 选择一份高蛋白主食</small></label><span class="must-time">19:30</span></div>
+          <div class="must-do-item"><input class="must-check" type="checkbox" id="must2"><label class="must-copy" for="must2"><strong>体态舒展</strong><small>身体 · 8 分钟也算完成</small></label><span class="must-time">21:30</span></div>
+          <div class="must-do-item"><input class="must-check" type="checkbox" id="must3"><label class="must-copy" for="must3"><strong>确认婚礼场地方案</strong><small>婚礼准备 · 先看完一版方案</small></label><span class="must-time">25 分钟</span></div>
+        </div>
+        <div class="section-title"><h2>本周进度</h2><button class="text-button" id="openCalendar">查看日历 →</button></div>
+        <div class="metric-grid" aria-label="本周进度明细">
+          <button class="metric metric-button" type="button" data-progress-target="training" aria-label="查看训练进度，已完成 2 次，共 4 次">
+            <span class="metric-top"><span class="metric-icon coral"><i data-lucide="dumbbell"></i></span><span class="metric-action">查看明细 <i data-lucide="chevron-right"></i></span></span>
+            <p>训练</p><strong>2 <small>/ 4 次</small></strong><div class="metric-progress coral" aria-hidden="true"><span style="width:50%"></span></div><em>还剩 2 次</em>
+          </button>
+          <button class="metric metric-button" type="button" data-progress-target="reading" aria-label="查看阅读进度，已完成 86%">
+            <span class="metric-top"><span class="metric-icon blue"><i data-lucide="book-open"></i></span><span class="metric-action">查看明细 <i data-lucide="chevron-right"></i></span></span>
+            <p>阅读</p><strong>86<small>%</small></strong><div class="metric-progress blue" aria-hidden="true"><span style="width:86%"></span></div><em>稳定上升</em>
+          </button>
+          <button class="metric metric-button" type="button" data-progress-target="wedding" aria-label="查看婚礼事项进度，已完成 7 项，共 12 项">
+            <span class="metric-top"><span class="metric-icon yellow"><i data-lucide="heart-handshake"></i></span><span class="metric-action">查看明细 <i data-lucide="chevron-right"></i></span></span>
+            <p>婚礼事项</p><strong>7 <small>/ 12 项</small></strong><div class="metric-progress yellow" aria-hidden="true"><span style="width:58%"></span></div><em>本周完成</em>
+          </button>
+        </div>
+        <div class="section-title"><h2>今日计划</h2><button class="text-button" id="addPlan">添加一项 +</button></div>
+        <div class="plan-list" id="planList">
+          <article class="plan-item" data-plan-name="力量训练 · 下肢" data-plan-category="身体" data-plan-time="18:30" data-plan-duration="45 分钟"><input class="plan-check" type="checkbox" aria-label="完成力量训练 · 下肢"><i data-lucide="dumbbell" style="color:var(--coral)"></i><span class="plan-copy"><strong>力量训练 · 下肢</strong><small>身体 · 45 分钟</small><span class="plan-status"></span></span><span class="time">18:30</span></article>
+          <article class="plan-item" data-plan-name="体态舒展" data-plan-category="身体" data-plan-time="21:30" data-plan-duration="8 分钟"><input class="plan-check" type="checkbox" aria-label="完成体态舒展"><i data-lucide="stretch-horizontal" style="color:var(--sage-dark)"></i><span class="plan-copy"><strong>体态舒展</strong><small>身体 · 8 分钟</small><span class="plan-status"></span></span><span class="time">21:30</span></article>
+          <article class="plan-item" data-plan-name="确认婚礼场地方案" data-plan-category="婚礼准备" data-plan-time="" data-plan-duration="25 分钟"><input class="plan-check" type="checkbox" aria-label="完成确认婚礼场地方案"><i data-lucide="heart-handshake" style="color:var(--yellow)"></i><span class="plan-copy"><strong>确认婚礼场地方案</strong><small>婚礼准备 · 优先事项</small><span class="plan-status"></span></span><span class="time">待安排</span></article>
+        </div>
+        <div class="section-title"><h2>未来目标</h2></div>
+        <div class="plan-banner" id="weddingPlanBanner"><i class="plan-icon" data-lucide="sparkles"></i><div><h3 id="weddingPlanHeadline">把想要的生活写下来</h3><p id="weddingPlanCopy">添加一个目标后，这里会显示目标日期和下一步行动。</p></div></div>
+      </section>
+
+      <section class="view" id="view-calendar" aria-labelledby="calendar-title">
+        <p class="eyebrow">日历 · 本周时间记录与计划</p><h2 class="hero-title" id="calendar-title">这一周，记录和计划都在这里。</h2>
+        <div class="calendar-toolbar"><button class="soft-button" id="calendarPrev"><i data-lucide="chevron-left" style="width:14px;height:14px"></i>上一周</button><h3 id="calendarRange">本周</h3><button class="soft-button" id="calendarNext">下一周<i data-lucide="chevron-right" style="width:14px;height:14px"></i></button></div>
+        <div class="calendar-key" aria-label="日历标记说明"><span><i class="key-done"></i>已记录</span><span><i class="key-plan"></i>待完成计划</span></div>
+        <div class="calendar-grid" id="calendarGrid" aria-label="周日历"></div>
+        <div class="section-title"><h2>这一周的事项</h2><button class="text-button" id="addCalendarPlan">添加计划 +</button></div>
+        <div class="calendar-list" id="calendarList"></div>
+        <div class="plan-banner" style="margin-top:18px"><i class="plan-icon" data-lucide="calendar-clock"></i><div><h3>日历不是为了排满时间</h3><p>它帮你看见已经发生的事，也为未来的重要事情留出真实的位置。</p></div></div>
+      </section>
+
+      <section class="view" id="view-meals" aria-labelledby="meals-title">
+        <p class="eyebrow">饮食记录 · 8 月 20 日</p><h2 class="hero-title" id="meals-title">吃得好，是照顾自己的方式。</h2>
+        <div class="section-title"><h2>今日餐桌</h2><button class="soft-button" id="openMeal"><i data-lucide="plus" style="width:14px;height:14px"></i>记录饮食</button></div>
+        <div class="meal-grid" id="mealGrid">
+          <button class="meal-item meal-editable" data-meal-type="早餐" data-meal-content="希腊酸奶 + 香蕉 + 鸡蛋" data-meal-feel="刚刚好" aria-label="编辑早餐：希腊酸奶、香蕉和鸡蛋"><span class="meal-icon breakfast"><i data-lucide="sun"></i></span><span class="meal-copy"><strong>早餐 · 希腊酸奶 + 香蕉 + 鸡蛋</strong><p>07:25 · 高蛋白 · 记录完整</p></span><span class="meal-add" aria-hidden="true"><i data-lucide="chevron-right"></i></span></button>
+          <button class="meal-item meal-editable" data-meal-type="午餐" data-meal-content="照烧鸡腿饭 + 西兰花" data-meal-feel="刚刚好" aria-label="编辑午餐：照烧鸡腿饭和西兰花"><span class="meal-icon lunch"><i data-lucide="salad"></i></span><span class="meal-copy"><strong>午餐 · 照烧鸡腿饭 + 西兰花</strong><p>12:20 · 约 32g 蛋白质</p></span><span class="meal-add" aria-hidden="true"><i data-lucide="chevron-right"></i></span></button>
+          <button class="meal-item meal-editable" data-new-meal-type="晚餐" aria-label="添加晚餐"><span class="meal-icon dinner"><i data-lucide="moon"></i></span><span class="meal-copy"><strong>晚餐</strong><p>还没有记录，先为今晚选一道菜吧</p></span><span class="meal-add" aria-hidden="true"><i data-lucide="plus"></i></span></button>
+          <button class="meal-item meal-editable" data-new-meal-type="饮品 / 零食" aria-label="添加饮品或零食"><span class="meal-icon snack"><i data-lucide="coffee"></i></span><span class="meal-copy"><strong>饮品 / 零食</strong><p>今天还没有记录</p></span><span class="meal-add" aria-hidden="true"><i data-lucide="plus"></i></span></button>
+        </div>
+        <div class="section-title recipe-section"><h2>今晚的轻食菜谱</h2><button class="text-button" id="nextRecipeSet" type="button">换一批 →</button></div>
+        <div class="recipe-row" id="recipeRow" aria-live="polite"></div>
+      </section>
+
+      <section class="view" id="view-review" aria-labelledby="review-title">
+        <p class="eyebrow">复盘 · 让经验留下来</p><h2 class="hero-title" id="review-title">把每一天过得更有把握。</h2><p class="review-purpose">自律不是每天满分，而是每天留下事实，定期回看，再调整下一步。</p>
+        <div class="review-tabs" role="tablist" aria-label="复盘类型"><button class="review-tab active" role="tab" aria-selected="true" data-review-view="day">日复盘</button><button class="review-tab" role="tab" aria-selected="false" data-review-view="week">周复盘</button><button class="review-tab" role="tab" aria-selected="false" data-review-view="month">月复盘</button></div>
+        <div class="review-panel active" id="review-day">
+        <div class="daily-feeling-card" id="dailyFeelingCard"><div class="daily-feeling-head"><h3 id="dailyFeelingTitle">今日感受</h3><button class="text-button" id="editFeeling">记录感受 +</button></div><p id="dailyFeelingText">今天还没有写下感受。可以记录一下心情、身体状态，或今天发生的事。</p><p class="feeling-meta" id="dailyFeelingMeta">只对自己可见</p></div>
+        <div class="review-template" id="dayReviewTemplate">
+          <div class="review-template-head"><div><h3>行动复盘</h3><p>回顾每天做了什么，每天进步一点点。</p></div><span class="review-save-state" id="dayReviewSaveState">未填写</span></div>
+          <div class="review-template-fields"><div class="review-template-field"><label for="dayReviewWins">今天我完成了……</label><textarea id="dayReviewWins" placeholder="写下今天实际完成的事情，不需要包装"></textarea></div><div class="review-template-field"><label for="dayReviewStrength">我做得好的……</label><textarea id="dayReviewStrength" placeholder="哪些做法、选择或坚持值得保留？"></textarea></div><div class="review-template-field"><label for="dayReviewImprove">我可以改进的……</label><textarea id="dayReviewImprove" placeholder="明天只改进一个具体的小地方"></textarea></div><div class="review-template-field"><label for="dayReviewNext">我的下一步行动……</label><textarea id="dayReviewNext" placeholder="写一个明天可以直接开始的动作"></textarea></div></div>
+          <div class="review-template-footer"><small>保存后会进入本周和本月的复盘轨迹。</small><button class="primary-button" id="saveDayReview" type="button"><i data-lucide="save" style="width:14px;height:14px"></i>保存今日复盘</button></div>
+        </div>
+        <div class="history-controls"><button class="history-nav-button" id="reviewPrevDay" aria-label="前一天"><i data-lucide="chevron-left"></i></button><div class="history-date-field"><label for="reviewDateInput">回顾哪一天</label><input id="reviewDateInput" type="date"></div><button class="history-nav-button" id="reviewNextDay" aria-label="后一天"><i data-lucide="chevron-right"></i></button></div>
+        <div class="history-summary-grid"><div class="history-summary"><span>实际经过</span><strong id="historyActual">0m</strong><em id="historyActualHint">等待记录</em></div><div class="history-summary"><span>成长投入</span><strong id="historyGrowth">0m</strong><em id="historyGrowthHint">阅读 / 学习</em></div><div class="history-summary"><span>计划完成</span><strong id="historyPlan">0 / 0</strong><em id="historyPlanHint">等待计划</em></div></div>
+        <div class="history-section-title"><h3>时间花在哪里</h3><span id="historyBreakdownHint">按实际经过时间</span></div>
+        <div class="history-bars" id="historyBars"><div class="history-bar-row"><label>工作</label><div class="history-bar-track"><div class="history-bar-fill work" id="historyWorkBar" style="width:0%"></div></div><output id="historyWorkValue">0m</output></div><div class="history-bar-row"><label>生活</label><div class="history-bar-track"><div class="history-bar-fill life" id="historyLifeBar" style="width:0%"></div></div><output id="historyLifeValue">0m</output></div><div class="history-bar-row"><label>成长</label><div class="history-bar-track"><div class="history-bar-fill growth" id="historyGrowthBar" style="width:0%"></div></div><output id="historyGrowthValue">0m</output></div><div class="history-bar-row"><label>照顾自己</label><div class="history-bar-track"><div class="history-bar-fill care" id="historyCareBar" style="width:0%"></div></div><output id="historyCareValue">0m</output></div></div>
+        <div class="history-section-title"><h3>这一天做过什么</h3><span id="historyRecordCount">暂无记录</span></div>
+        <div class="history-record-list" id="historyRecordList"><div class="history-empty">这一天还没有时间记录。完成一段活动或手动补录后，就会沉淀在这里。</div></div>
+        <div class="history-section-title"><h3>吃了什么</h3><span id="historyMealCount">暂无记录</span></div>
+        <div class="history-record-list" id="historyMealList"><div class="history-empty">饮食记录会和这一天一起保存，方便之后回看状态。</div></div>
+        <div class="section-title"><h2>今日 AI 复盘</h2><button class="soft-button" id="openSummary"><i data-lucide="mic" style="width:14px;height:14px"></i>说说今天</button></div>
+        <div class="review-card"><span class="review-tag">AI 复盘 · 基于你保存的记录</span><h3 id="reviewHeadline">记录完成后，这里会形成你的当天总结。</h3><p id="reviewSummary">先记录几段活动、饮食和感受，AI 会根据真实数据帮你整理今天的节奏。</p><div class="review-actions"><button class="soft-button" id="editReview">编辑文字</button><button class="primary-button" id="planTomorrow">加入明日计划</button></div></div>
+        <div class="section-title"><h2>这一天的发现</h2></div>
+        <div class="plan-banner"><i class="plan-icon" data-lucide="lightbulb"></i><div><h3 id="dayInsightHeadline">从一段记录开始</h3><p id="dayInsightCopy">记录活动后，这里会看见你这一天的投入和节奏。</p></div></div>
+        </div>
+        <div class="review-panel" id="review-week">
+          <div class="section-title"><h2>这一周，时间花在哪里？</h2><button class="soft-button" id="openCalendarFromReview"><i data-lucide="calendar-days" style="width:14px;height:14px"></i>查看日历</button></div>
+          <div class="period-toolbar"><button class="period-nav" id="weekReviewPrev" type="button" aria-label="上一周"><i data-lucide="chevron-left"></i></button><h3 id="weekReviewRange">本周</h3><button class="period-nav" id="weekReviewNext" type="button" aria-label="下一周"><i data-lucide="chevron-right"></i></button></div>
+          <div class="metric-grid"><div class="metric"><p>真实经过</p><strong id="weekRecorded">0m</strong><em id="weekRecordedHint">0 天有记录</em></div><div class="metric"><p>训练</p><strong id="weekTraining">0 次</strong><em id="weekTrainingHint">等待记录</em></div><div class="metric"><p>阅读</p><strong id="weekReading">0m</strong><em id="weekReadingHint">等待记录</em></div></div>
+          <div class="week-goals-head"><h3>本周目标进度</h3><span>来自时间记录</span></div>
+          <div class="week-goal-list" id="weekGoalList"></div>
+          <div class="skin-tracker" aria-label="本周皮肤状态追踪">
+            <div class="skin-tracker-head"><div><h3>本周皮肤状态</h3><p>每天花 30 秒记录，观察自己的变化趋势</p></div><strong id="skinWeekAverage">--</strong></div>
+            <div class="skin-days" id="skinDays"></div>
+            <div class="skin-radar" id="skinRadar" role="img" aria-label="皮肤五维状态图"><span class="skin-radar-label top">水油度</span><span class="skin-radar-label right">肤色</span><span class="skin-radar-label bottom-right">敏感度</span><span class="skin-radar-label bottom-left">光滑度</span><span class="skin-radar-label left">衰老度</span></div>
+            <div class="skin-dimensions"><div class="skin-dimension"><label for="skinOil">水油平衡</label><input id="skinOil" type="number" min="0" max="100" step="1" value="60"><output class="skin-score" id="skinOilScore">60</output></div><div class="skin-dimension"><label for="skinTone">肤色状态</label><input id="skinTone" type="number" min="0" max="100" step="1" value="60"><output class="skin-score" id="skinToneScore">60</output></div><div class="skin-dimension"><label for="skinSensitive">敏感稳定</label><input id="skinSensitive" type="number" min="0" max="100" step="1" value="60"><output class="skin-score" id="skinSensitiveScore">60</output></div><div class="skin-dimension"><label for="skinSmooth">光滑度</label><input id="skinSmooth" type="number" min="0" max="100" step="1" value="60"><output class="skin-score" id="skinSmoothScore">60</output></div><div class="skin-dimension"><label for="skinAge">年轻状态</label><input id="skinAge" type="number" min="0" max="100" step="1" value="60"><output class="skin-score" id="skinAgeScore">60</output></div></div>
+            <div class="skin-save-row"><small id="skinSelectedDate">记录 8 月 24 日 · 分数越高代表当前状态越稳定</small><button class="primary-button" id="saveSkinCheck" type="button"><i data-lucide="save" style="width:14px;height:14px"></i>保存今日皮肤</button></div>
+            <p class="skin-note">这是个人状态记录，不是皮肤检测或医学诊断。若出现持续红肿、疼痛、瘙痒或明显变化，请咨询皮肤科专业人士。</p>
+          </div>
+          <div class="week-timeline-head"><div><h3>一周时间轴</h3><p>按小时回看每天的活动，重叠活动会自动分层</p></div><span class="eyebrow" style="margin:0">06:00 - 24:00</span></div>
+          <div class="week-calendar-scroll"><div class="week-calendar" id="weekTimeline" aria-label="一周时间轴"></div></div>
+          <div class="week-allocation-head"><div><h3>活动投入分布</h3><p>按已记录活动时长汇总</p></div><span id="weekAllocationRange">本周</span></div>
+          <div class="week-allocation" aria-label="本周活动投入分布">
+            <div class="week-donut-wrap"><div class="week-donut" id="weekDonut" role="img" aria-label="本周活动投入分布"><div class="week-donut-center"><strong id="weekAllocationTotal">0m</strong><span>活动投入</span></div></div><p class="week-donut-caption" id="weekAllocationCaption">记录活动后，这里会显示时间占比。</p></div>
+            <div class="week-category-list" id="weekCategoryList"></div>
+          </div>
+          <div class="week-analysis-note" id="weekAnalysisNote" aria-live="polite"><i data-lucide="sparkles"></i><div><strong>从一段记录开始</strong><p>记录活动后，这里会分析你把时间花在了哪里。</p></div></div>
+          <div class="history-section-title"><h3>复盘觉察</h3><span>不只看数字，也听见自己</span></div>
+          <div class="week-observation-list">
+            <div class="week-observation"><div class="week-observation-head"><span class="week-observation-icon green">●</span><label for="weekObserveWins">本周执行亮点</label></div><textarea id="weekObserveWins" placeholder="记录这周做得好的 3-5 件事，哪怕很小也值得被看见"></textarea></div>
+            <div class="week-observation"><div class="week-observation-head"><span class="week-observation-icon yellow">●</span><label for="weekObserveStuck">本周卡点 / 小问题</label></div><textarea id="weekObserveStuck" placeholder="哪件事推进不顺利？原因是什么？需要什么支持？"></textarea></div>
+            <div class="week-observation"><div class="week-observation-head"><span class="week-observation-icon blue">●</span><label for="weekObserveBody">身体觉察</label></div><textarea id="weekObserveBody" placeholder="睡眠、饮食、运动、精力状态如何？身体在给你什么信号？"></textarea></div>
+            <div class="week-observation"><div class="week-observation-head"><span class="week-observation-icon coral">●</span><label for="weekObserveMoney">金钱觉察</label></div><textarea id="weekObserveMoney" placeholder="本周收支如何？有什么消费冲动或理财思考？"></textarea></div>
+            <div class="week-observation"><div class="week-observation-head"><span class="week-observation-icon purple">●</span><label for="weekObserveMood">情绪觉察</label></div><textarea id="weekObserveMood" placeholder="这周情绪状态如何？有什么触发情绪的事件？"></textarea></div>
+            <div class="week-observation"><div class="week-observation-head"><span class="week-observation-icon sage">●</span><label for="weekObserveSelf">自我觉察</label></div><textarea id="weekObserveSelf" placeholder="对自己的新发现？价值观或认知上有什么变化？"></textarea></div>
+          </div>
+          <div class="week-next-action"><div class="week-next-action-head"><h3>下周重点待办</h3><span class="eyebrow" style="margin:0">把觉察变成行动</span></div><div class="week-next-action-input"><input id="weekActionInput" maxlength="40" placeholder="待办内容..." aria-label="下周重点待办内容"><input id="weekActionDate" type="date" aria-label="待办日期"><select id="weekActionPriority" aria-label="待办优先级"><option>中</option><option>高</option><option>低</option></select><button id="addWeekAction" type="button"><i data-lucide="plus" style="width:13px;height:13px"></i>添加</button></div><div class="week-next-action-list" id="weekActionList"></div></div>
+          <div class="review-template-footer"><small id="weekReviewSaveState">保存后保留本周觉察内容</small><button class="primary-button" id="saveWeekReview" type="button"><i data-lucide="save" style="width:14px;height:14px"></i>保存周复盘</button></div>
+          <div class="history-section-title"><h3>本周日复盘轨迹</h3><span>点击日期回看当天</span></div>
+          <div class="review-trace-list" id="weekDayTrace"></div>
+        </div>
+        <div class="review-panel" id="review-month">
+          <div class="section-title"><h2>月复盘</h2><span class="eyebrow" id="monthReviewSubtitle" style="margin:0">把一月的坚持看完整</span></div>
+          <div class="period-toolbar"><button class="period-nav" id="monthReviewPrev" type="button" aria-label="上一个月"><i data-lucide="chevron-left"></i></button><h3 id="monthReviewRange">本月</h3><button class="period-nav" id="monthReviewNext" type="button" aria-label="下一个月"><i data-lucide="chevron-right"></i></button></div>
+          <div class="month-summary-grid"><div class="month-summary"><span>真实经过</span><strong id="monthRecorded">0m</strong><em id="monthRecordedHint">0 天有记录</em></div><div class="month-summary"><span>记录天数</span><strong id="monthRecordDays">0 天</strong><em id="monthRecordDaysHint">从日复盘汇总</em></div><div class="month-summary"><span>周复盘</span><strong id="monthReviewedWeeks">0 / 0</strong><em>完成模板填写</em></div></div>
+          <div class="month-index-head"><div><h3>本月行动索引</h3><p>先看投入，再记录这个月真正发生了什么</p></div><span id="monthReviewSaveState">未填写</span></div>
+          <div class="month-action-grid" id="monthActionGrid"></div>
+          <div class="month-summary-card"><h3>本月值得记录的成就</h3><textarea id="monthReviewWins" placeholder="写下本月实现的里程碑，以及 1-3 件值得记住的成就"></textarea></div>
+          <div class="month-summary-card"><h3>本月感到有挑战的事</h3><textarea id="monthReviewPattern" placeholder="哪些事推进不顺利？发生了什么，需要什么支持？"></textarea></div>
+          <div class="month-summary-card"><h3>下月优先级目标</h3><textarea id="monthReviewAdjust" placeholder="下个月最重要的一件事，写成具体的下一步"></textarea></div>
+          <div class="month-summary-card"><h3>备忘：我学到的观点</h3><textarea id="monthReviewMemo" placeholder="学到的重要观点、对自己的再认识，或想留给未来的提醒"></textarea></div>
+          <div class="review-template-footer"><small>月复盘是自我整理，不要求每个领域都填写。</small><button class="primary-button" id="saveMonthReview" type="button"><i data-lucide="save" style="width:14px;height:14px"></i>保存月复盘</button></div>
+          <div class="history-section-title"><h3>从周复盘回看</h3><span id="monthWeekCount">暂无周记录</span></div>
+          <div class="month-week-list" id="monthWeekList"></div>
+          <div class="history-section-title"><h3>本月日复盘轨迹</h3><span>点击日期回看当天</span></div>
+          <div class="review-trace-list" id="monthDayTrace"></div>
+        </div>
+      </section>
+
+      <section class="view" id="view-me" aria-labelledby="me-title">
+        <p class="eyebrow">我的设置</p><div class="profile-head"><div class="avatar" id="profileAvatar" aria-label="默认头像"><i data-lucide="user-round"></i></div><div><h2 id="me-title">我的资料</h2><p id="profileTagline">与重要的事，一起慢慢靠近</p></div><button class="profile-edit" id="editProfile">编辑资料</button></div>
+        <p class="settings-intro">这里集中管理你的目标、日计划、提醒、隐私和数据。点击每一项即可修改。</p>
+        <div class="section-title"><h2>想实现的事</h2><button class="text-button" id="addGoal">添加目标 +</button></div>
+        <div class="goal-list" id="goalList"><div class="goal-empty" id="goalEmpty"><strong>先写下一个真正想要的结果</strong><p>例如：拍一组让自己喜欢的婚纱照。训练、减脂、体态和牙齿护理，都可以作为实现它的行动。</p><button class="primary-button" id="addGoalEmpty"><i data-lucide="plus" style="width:14px;height:14px"></i>添加我的第一个目标</button></div></div>
+        <div class="section-title"><h2>设置入口</h2></div>
+        <div class="setting-list"><button class="setting-row" id="settingsReminders"><i data-lucide="bell"></i><span>提醒与低打扰模式</span><small>已开启</small><i data-lucide="chevron-right"></i></button><button class="setting-row" id="settingsPrivacy"><i data-lucide="shield-check"></i><span>隐私与 AI 设置</span><small>仅自己可见</small><i data-lucide="chevron-right"></i></button><button class="setting-row" id="settingsExport"><i data-lucide="download"></i><span>导出我的记录</span><small>CSV / JSON</small><i data-lucide="chevron-right"></i></button><button class="setting-row" id="clearLocalData"><i data-lucide="trash-2" style="color:var(--coral)"></i><span>清空本地数据</span><small style="color:var(--coral)">不可恢复</small><i data-lucide="chevron-right"></i></button></div>
+      </section>
+    </main>
+
+    <button class="fab" id="fabStart" aria-label="开始记录"><i data-lucide="play" style="width:22px;height:22px;fill:currentColor"></i></button>
+    <nav class="bottom-nav" aria-label="主导航">
+      <button class="nav-item active" data-view="today"><i data-lucide="sun"></i><span>今天</span></button>
+      <button class="nav-item" data-view="plan"><i data-lucide="calendar-check-2"></i><span>计划</span></button>
+      <button class="nav-item" data-view="meals"><i data-lucide="utensils"></i><span>饮食</span></button>
+      <button class="nav-item" data-view="review"><i data-lucide="sparkles"></i><span>复盘</span></button>
+      <button class="nav-item" data-view="me"><i data-lucide="user-round"></i><span>我的</span></button>
+    </nav>
+  </div>
+
+  <div class="modal-layer" id="startModal" role="dialog" aria-modal="true" aria-labelledby="startTitle">
+    <div class="modal"><div class="modal-head"><h2 id="startTitle">现在要做什么？</h2><button class="close-button close-modal" aria-label="关闭"><i data-lucide="x"></i></button></div><div class="activity-options">
+      <p class="activity-section-label">常用活动</p>
+      <button class="activity-option" data-start-activity="通勤"><i data-lucide="train-front"></i>通勤</button><button class="activity-option" data-start-activity="上班"><i data-lucide="briefcase-business"></i>上班</button><button class="activity-option" data-start-activity="阅读"><i data-lucide="book-open"></i>阅读</button><button class="activity-option" data-start-activity="健身"><i data-lucide="dumbbell"></i>健身</button><button class="activity-option" data-start-activity="做饭"><i data-lucide="cooking-pot"></i>做饭</button><button class="activity-option" data-start-activity="玩手机"><i data-lucide="smartphone"></i>玩手机</button>
+      <p class="activity-section-label">身体与运动</p>
+      <button class="activity-option" data-start-activity="打球"><i data-lucide="circle-dot"></i>打球</button><button class="activity-option" data-start-activity="瑜伽"><i data-lucide="stretch-horizontal"></i>瑜伽</button><button class="activity-option" data-start-activity="体态练习"><i data-lucide="accessibility"></i>体态练习</button>
+      <p class="activity-section-label">成长与专注</p>
+      <button class="activity-option" data-start-activity="学习"><i data-lucide="graduation-cap"></i>学习</button><button class="activity-option" data-start-activity="练字"><i data-lucide="square-pen"></i>练字</button>
+      <p class="activity-section-label">生活与放松</p>
+      <button class="activity-option" data-start-activity="买菜"><i data-lucide="shopping-basket"></i>买菜</button><button class="activity-option" data-start-activity="逛街"><i data-lucide="shopping-bag"></i>逛街</button><button class="activity-option" data-start-activity="按摩放松"><i data-lucide="heart-pulse"></i>按摩放松</button><button class="activity-option" data-start-activity="其他"><i data-lucide="more-horizontal"></i>其他</button>
+    </div><div class="modal-footer"><button class="soft-button close-modal">先不记录</button></div></div>
+  </div>
+
+  <div class="modal-layer" id="manualModal" role="dialog" aria-modal="true" aria-labelledby="manualTitle">
+    <div class="modal"><div class="modal-head"><h2 id="manualTitle">手动补录一段时间</h2><button class="close-button close-modal" aria-label="关闭"><i data-lucide="x"></i></button></div><div class="form-stack"><div class="form-field"><label for="manualActivity">我在做什么</label><input id="manualActivity" value="学习" placeholder="例如：整理照片"></div><div class="two-col"><div class="form-field"><label for="manualStart">开始时间</label><input id="manualStart" type="time" value="14:00"></div><div class="form-field"><label for="manualEnd">结束时间</label><input id="manualEnd" type="time" value="15:30"></div></div><div class="form-field"><label for="manualCategory">分类</label><select id="manualCategory"><option>成长</option><option>工作</option><option>生活</option><option>自我照顾</option></select></div><div class="form-field"><label for="manualNote">备注（可选）</label><textarea id="manualNote" placeholder="这段时间有什么值得记下来的？"></textarea></div></div><div class="modal-footer"><button class="soft-button close-modal">取消</button><button class="primary-button" id="saveManual">保存记录</button></div></div>
+  </div>
+
+  <div class="modal-layer" id="summaryModal" role="dialog" aria-modal="true" aria-labelledby="summaryTitle">
+    <div class="modal"><div class="modal-head"><h2 id="summaryTitle">说说今天</h2><button class="close-button close-modal" aria-label="关闭"><i data-lucide="x"></i></button></div><div class="voice-box"><button class="voice-button" id="voiceButton" aria-label="开始语音输入"><i data-lucide="mic"></i></button><div class="voice-copy"><strong id="voiceStatus">点击开始说话</strong><p>可以说说今天的状态、完成的事和卡住的地方</p></div></div><div class="form-field" style="margin-top:13px"><label for="summaryText">也可以直接写下来</label><textarea id="summaryText" placeholder="例如：今天有点累，但完成了训练和两顿高蛋白……"></textarea></div><div class="ai-output" id="aiOutput"><h3>AI 已帮你理清今天</h3><p><strong>完成与亮点：</strong>你完成了早间护肤、体态激活，并把通勤时间转化成了阅读时间。</p><p><strong>状态观察：</strong>下午能量可能有所下降，今晚适合从轻量训练开始，不必追求一次做到满分。</p><p><strong>明日一件重要的事：</strong>确认婚礼场地方案，预留 25 分钟完成第一步。</p></div><div class="modal-footer"><button class="soft-button close-modal">稍后再说</button><button class="soft-button" id="saveFeeling">保存感受</button><button class="primary-button" id="generateAi"><i data-lucide="sparkles" style="width:14px;height:14px"></i>保存并生成</button></div></div>
+  </div>
+
+  <div class="modal-layer" id="mealModal" role="dialog" aria-modal="true" aria-labelledby="mealTitle">
+    <div class="modal"><div class="modal-head"><h2 id="mealTitle">记录一餐</h2><button class="close-button close-modal" aria-label="关闭"><i data-lucide="x"></i></button></div><div class="form-stack"><div class="form-field"><label for="mealType">餐次</label><select id="mealType"><option>晚餐</option><option>早餐</option><option>午餐</option><option>饮品 / 零食</option></select></div><div class="form-field"><label for="mealContent">吃了什么 / 喝了什么</label><input id="mealContent" placeholder="例如：虾仁豆腐蔬菜汤"></div><div class="form-field"><label for="mealFeel">吃完的感受</label><select id="mealFeel"><option>刚刚好</option><option>有点撑</option><option>还不够饱</option><option>随手记录</option></select></div></div><div class="modal-footer"><button class="soft-button close-modal">取消</button><button class="primary-button" id="saveMeal">保存饮食</button></div></div>
+  </div>
+
+  <div class="modal-layer" id="themeModal" role="dialog" aria-modal="true" aria-labelledby="themeModalTitle">
+    <div class="modal">
+      <div class="modal-head"><h2 id="themeModalTitle">编辑今日计划</h2><button class="close-button close-modal" aria-label="关闭"><i data-lucide="x"></i></button></div>
+      <div class="form-stack">
+        <div class="form-field"><label for="themeSelect">今天的主题日</label><select id="themeSelect"><option value="力量启动日">力量启动日 · 健身 + 蛋白质 + 早睡</option><option value="专注成长日">专注成长日 · 阅读 + 练字 + 少刷手机</option><option value="活力球场日">活力球场日 · 打球 + 拉伸 + 补水</option><option value="温柔修复日" selected>温柔修复日 · 瑜伽 + 放松 + 轻量计划</option><option value="生活补给日">生活补给日 · 买菜 + 做饭 + 整理</option><option value="婚礼推进日">婚礼推进日 · 一个关键事项 + 生活照顾</option><option value="整理复盘日">整理复盘日 · 收纳 + 周计划 + 休息</option><option value="__custom__">自定义主题日…</option></select></div>
+        <div class="form-field" id="customThemeFields" hidden><label for="customThemeName">自定义主题名称</label><input id="customThemeName" maxlength="18" placeholder="例如：轻松收尾日"><label for="customThemeDescription">今天想怎么过</label><input id="customThemeDescription" maxlength="58" placeholder="例如：整理房间、吃好晚餐、早点休息"></div>
+        <div class="form-field"><label>每天必做 3 件事</label><input id="mustDoInput1" value="好好吃一顿晚餐" maxlength="22"><input id="mustDoInput2" value="体态舒展" maxlength="22"><input id="mustDoInput3" value="确认婚礼场地方案" maxlength="22"></div>
+      </div>
+      <div class="modal-footer"><button class="soft-button close-modal">取消</button><button class="primary-button" id="saveTheme">保存今天的计划</button></div>
+    </div>
+  </div>
+
+  <div class="modal-layer" id="planModal" role="dialog" aria-modal="true" aria-labelledby="planModalTitle">
+    <div class="modal">
+      <div class="modal-head"><h2 id="planModalTitle">添加今日计划</h2><button class="close-button close-modal" aria-label="关闭"><i data-lucide="x"></i></button></div>
+      <div class="form-stack">
+        <div class="form-field"><label for="planNameInput">要做什么</label><input id="planNameInput" placeholder="例如：下班后买菜"></div>
+        <div class="two-col"><div class="form-field"><label for="planCategoryInput">分类</label><select id="planCategoryInput"><option>工作</option><option>通勤</option><option>身体</option><option>成长</option><option>生活</option><option>自我照顾</option><option>休闲</option><option>娱乐</option><option>婚礼准备</option></select></div><div class="form-field"><label for="planTimeInput">开始时间</label><input id="planTimeInput" type="time"></div></div>
+        <div class="form-field"><label for="planDurationInput">预计多久</label><select id="planDurationInput"><option>15 分钟</option><option>25 分钟</option><option>30 分钟</option><option>45 分钟</option><option>1 小时</option><option>不设时长</option></select></div>
+      </div>
+      <div class="modal-footer"><button class="soft-button close-modal">取消</button><button class="primary-button" id="savePlan">保存计划</button></div>
+    </div>
+  </div>
+
+  <div class="modal-layer" id="goalModal" role="dialog" aria-modal="true" aria-labelledby="goalModalTitle">
+    <div class="modal"><div class="modal-head"><h2 id="goalModalTitle">添加一个目标</h2><button class="close-button close-modal" aria-label="关闭"><i data-lucide="x"></i></button></div><div class="form-stack"><div class="form-field"><label for="goalNameInput">我想实现什么</label><input id="goalNameInput" maxlength="36" placeholder="例如：拍一组让自己喜欢的婚纱照"></div><div class="form-field"><label for="goalWhyInput">为什么重要（可选）</label><textarea id="goalWhyInput" maxlength="100" placeholder="例如：希望婚礼时状态好、笑得自然，也留下喜欢的照片"></textarea></div><div class="form-field"><label for="goalDeadlineInput">目标日期（可选）</label><input id="goalDeadlineInput" type="date"><span class="eyebrow" style="margin:0">不填写也可以，目标不会被默认绑定到婚礼</span></div><div class="form-field"><label for="goalActionsInput">为了它，我要做的事</label><input id="goalActionsInput" placeholder="用顿号分隔，例如：减脂、体态矫正、牙齿护理、护肤"><span class="eyebrow" style="margin:0">这些是行动，不是新的主目标</span></div></div><div class="modal-footer"><button class="soft-button close-modal">取消</button><button class="primary-button" id="saveGoals">保存目标</button></div></div>
+  </div>
+
+  <div class="modal-layer" id="settingsModal" role="dialog" aria-modal="true" aria-labelledby="settingsModalTitle">
+    <div class="modal"><div class="modal-head"><h2 id="settingsModalTitle">设置</h2><button class="close-button close-modal" aria-label="关闭"><i data-lucide="x"></i></button></div><div class="form-stack"><div class="form-field"><label for="reminderMode">提醒方式</label><select id="reminderMode"><option selected>低打扰 · 只提醒重要事项</option><option>标准 · 计划前提醒</option><option>关闭主动提醒</option></select></div><div class="form-field"><label for="aiPrivacy">AI 复盘数据</label><select id="aiPrivacy"><option selected>仅用于我的复盘，不公开</option><option>关闭 AI 分析</option></select></div><div class="form-field"><label for="exportFormat">导出格式</label><select id="exportFormat"><option>CSV · 时间和饮食记录</option><option>JSON · 全部原始数据</option><option>PDF · 周报</option></select></div></div><div class="modal-footer"><button class="soft-button close-modal">取消</button><button class="primary-button" id="saveSettings">保存设置</button></div></div>
+  </div>
+  <div class="modal-layer" id="profileModal" role="dialog" aria-modal="true" aria-labelledby="profileModalTitle">
+    <div class="modal"><div class="modal-head"><h2 id="profileModalTitle">编辑资料</h2><button class="close-button close-modal" aria-label="关闭"><i data-lucide="x"></i></button></div><div class="form-stack"><div class="form-field"><label for="profileAvatarFile">头像（可选）</label><input class="file-input" id="profileAvatarFile" type="file" accept="image/png,image/jpeg,image/webp"><span class="eyebrow" id="profileAvatarHint" style="margin:0">不上传时显示默认头像</span></div><div class="form-field"><label for="profileName">怎么称呼你（可选）</label><input id="profileName" maxlength="20" placeholder="例如：小林"></div><div class="form-field"><label for="profileTaglineInput">给自己的备注（可选）</label><input id="profileTaglineInput" maxlength="40" value="与重要的事，一起慢慢靠近"></div></div><div class="modal-footer"><button class="soft-button close-modal">取消</button><button class="primary-button" id="saveProfile">保存资料</button></div></div>
+  </div>
+  <div class="toast" id="toast" role="status"></div>
+
+  <script>
+    const root = document.getElementById('app');
+    const $ = (selector, scope = document) => scope.querySelector(selector);
+    const $$ = (selector, scope = document) => [...scope.querySelectorAll(selector)];
+    const modalIds = ['startModal', 'manualModal', 'summaryModal', 'mealModal', 'themeModal', 'planModal', 'goalModal', 'settingsModal', 'profileModal'];
+    const activityStart = {};
+    let toastTimer;
+    let editingPlan = null;
+    let editingMeal = null;
+    let editingGoal = null;
+    let goals = [];
+    let speechRecognition = null;
+    let speechBaseText = '';
+    let speechFinalText = '';
+    let speechInterimText = '';
+    let speechIsListening = false;
+    let pendingProfileAvatar = null;
+    let savedProfileAvatar = '';
+    let dailyFeeling = null;
+    let selectedReviewDate = '';
+    let calendarWeekOffset = 0;
+    let weekCategoryFilter = 'all';
+    let monthReviewOffset = 0;
+    let recipeSetIndex = 0;
+    const recipeSets = [
+      [
+        { icon: 'salad', time: '25 分钟', name: '柠檬鸡胸藜麦碗', ingredients: '鸡胸 · 藜麦 · 番茄 · 牛油果' },
+        { icon: 'soup', time: '20 分钟', name: '虾仁豆腐蔬菜汤', ingredients: '虾仁 · 嫩豆腐 · 菌菇 · 青菜' },
+        { icon: 'utensils', time: '15 分钟', name: '金枪鱼全麦三明治', ingredients: '全麦面包 · 金枪鱼 · 生菜' }
+      ],
+      [
+        { icon: 'cooking-pot', time: '30 分钟', name: '番茄牛肉蔬菜烩', ingredients: '牛肉 · 番茄 · 洋葱 · 胡萝卜' },
+        { icon: 'salad', time: '18 分钟', name: '鸡蛋菠菜暖沙拉', ingredients: '鸡蛋 · 菠菜 · 玉米 · 芝麻' },
+        { icon: 'soup', time: '22 分钟', name: '鲑鱼南瓜浓汤', ingredients: '鲑鱼 · 南瓜 · 西兰花' }
+      ],
+      [
+        { icon: 'utensils', time: '12 分钟', name: '牛油果鸡蛋开放吐司', ingredients: '全麦吐司 · 牛油果 · 鸡蛋' },
+        { icon: 'salad', time: '20 分钟', name: '虾仁西兰花荞麦面', ingredients: '虾仁 · 西兰花 · 荞麦面' },
+        { icon: 'cooking-pot', time: '25 分钟', name: '菌菇鸡腿焖饭', ingredients: '鸡腿 · 菌菇 · 糙米 · 青豆' }
+      ]
+    ];
+    const themeDescriptions = {
+      '力量启动日': '把能量用在身体上：完成训练、补充蛋白质，并为睡眠留一点余地。',
+      '专注成长日': '为自己留一段不被打扰的时间：阅读、练字，少一点无意识刷手机。',
+      '活力球场日': '让身体好好活动：打球、拉伸、补水，感受运动后的轻松。',
+      '温柔修复日': '忙碌中留一点空间给身体：完成体态舒展、轻量训练和晚间放松。',
+      '生活补给日': '把生活安顿好：买菜、做饭、整理，让下一周更从容。',
+      '婚礼推进日': '只推进一个关键事项，也别忘了吃饭、休息和照顾自己。',
+      '整理复盘日': '收拾生活，也回看这一周：留下值得继续的节奏。'
+    };
+
+    lucide.createIcons({ attrs: { width: 16, height: 16, 'stroke-width': 1.8 } });
+
+    function showToast(message) {
+      const toast = $('#toast'); toast.textContent = message; toast.classList.add('show');
+      clearTimeout(toastTimer); toastTimer = setTimeout(() => toast.classList.remove('show'), 2300);
+    }
+    const weatherNames = {
+      0: '晴', 1: '大部晴朗', 2: '局部多云', 3: '阴', 45: '雾', 48: '雾凇',
+      51: '小毛毛雨', 53: '毛毛雨', 55: '较强毛毛雨', 56: '冻毛毛雨', 57: '冻毛毛雨',
+      61: '小雨', 63: '中雨', 65: '大雨', 66: '冻雨', 67: '冻雨',
+      71: '小雪', 73: '中雪', 75: '大雪', 77: '雪粒', 80: '阵雨', 81: '阵雨', 82: '强阵雨',
+      85: '阵雪', 86: '强阵雪', 95: '雷雨', 96: '雷雨伴冰雹', 99: '雷雨伴冰雹'
+    };
+    function setLocationStatus(text, loading = false) {
+      const button = $('#locationButton');
+      $('#locationWeather').textContent = text;
+      button.classList.toggle('is-loading', loading);
+      button.disabled = loading;
+      button.setAttribute('aria-label', text);
+    }
+    async function fetchLocationWeather(latitude, longitude) {
+      const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${encodeURIComponent(latitude)}&longitude=${encodeURIComponent(longitude)}&current=temperature_2m,weather_code&timezone=auto&forecast_days=1`;
+      const placeUrl = `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${encodeURIComponent(latitude)}&longitude=${encodeURIComponent(longitude)}&localityLanguage=zh`;
+      const [weatherResult, placeResult] = await Promise.allSettled([fetch(weatherUrl), fetch(placeUrl)]);
+      let temperature = null; let weatherName = '';
+      if (weatherResult.status === 'fulfilled' && weatherResult.value.ok) {
+        const weather = await weatherResult.value.json();
+        const rawTemperature = Number(weather.current?.temperature_2m);
+        temperature = Number.isFinite(rawTemperature) ? Math.round(rawTemperature) : null;
+        weatherName = weatherNames[weather.current?.weather_code] || '当前天气';
+      }
+      let placeName = '当前位置';
+      if (placeResult.status === 'fulfilled' && placeResult.value.ok) {
+        const place = await placeResult.value.json();
+        placeName = place.city || place.locality || place.principalSubdivision || place.countryName || placeName;
+      }
+      if (temperature === null) setLocationStatus(`${placeName} · 天气暂不可用`);
+      else setLocationStatus(`${placeName} · ${weatherName} ${temperature}°C`);
+    }
+    function refreshLocationWeather() {
+      setLocationStatus('正在获取位置与天气…', true);
+      if (!navigator.geolocation) { setLocationStatus('当前设备不支持定位 · 点击重试'); return; }
+      navigator.geolocation.getCurrentPosition(
+        position => fetchLocationWeather(position.coords.latitude, position.coords.longitude)
+          .catch(() => setLocationStatus('已获取位置 · 天气暂不可用'))
+          .finally(() => { $('#locationButton').disabled = false; $('#locationButton').classList.remove('is-loading'); }),
+        error => {
+          const message = error.code === 1 ? '未授权定位 · 点击重试' : '暂时无法定位 · 点击重试';
+          setLocationStatus(message);
+        },
+        { enableHighAccuracy: false, maximumAge: 15 * 60 * 1000, timeout: 10000 }
+      );
+    }
+    function openModal(id) { document.getElementById(id).classList.add('open'); }
+    function closeModals() { stopSpeechRecognition(false); modalIds.forEach(id => document.getElementById(id).classList.remove('open')); }
+    function updateMustDoCount() {
+      const completed = $$('#mustDoList .must-check:checked').length;
+      $('#mustDoCount').textContent = `${completed} / 3 已完成`;
+      syncTodayPlanSnapshot();
+    }
+    function applyTheme() {
+      const selectedTheme = $('#themeSelect').value;
+      const isCustom = selectedTheme === '__custom__';
+      const theme = isCustom ? ($('#customThemeName').value.trim() || '我的主题日') : selectedTheme;
+      const description = isCustom ? ($('#customThemeDescription').value.trim() || '今天按自己的节奏来，优先完成最重要的三件事。') : themeDescriptions[theme];
+      $('#themeDayName').textContent = `${weekdayLabel()} · ${theme}`;
+      $('#themeDayDescription').textContent = description;
+      $$('#mustDoList .must-do-item strong').forEach((item, index) => {
+        const value = $(`#mustDoInput${index + 1}`).value.trim();
+        item.textContent = value || `今天最重要的第 ${index + 1} 件事`;
+      });
+      updateMustDoCount();
+      try { localStorage.setItem('shiguang.theme', JSON.stringify({ selectedTheme, customName: $('#customThemeName').value, customDescription: $('#customThemeDescription').value })); } catch (error) { /* current session remains usable */ }
+    }
+    function loadTheme() {
+      try {
+        const saved = JSON.parse(localStorage.getItem('shiguang.theme') || 'null');
+        if (!saved) return;
+        if (saved.selectedTheme) $('#themeSelect').value = saved.selectedTheme;
+        if (saved.customName) $('#customThemeName').value = saved.customName;
+        if (saved.customDescription) $('#customThemeDescription').value = saved.customDescription;
+        $('#customThemeFields').hidden = $('#themeSelect').value !== '__custom__';
+        applyTheme();
+      } catch (error) { /* default theme remains usable */ }
+    }
+    function loadProfile() {
+      try {
+        const saved = JSON.parse(localStorage.getItem('shiguang.profile') || 'null');
+        if (!saved) return;
+        const name = saved.name || '';
+        const tagline = saved.tagline || '与重要的事，一起慢慢靠近';
+        savedProfileAvatar = saved.avatar || '';
+        $('#me-title').textContent = name || '我的资料';
+        $('#profileTagline').textContent = tagline;
+        const avatar = $('#profileAvatar');
+        avatar.style.backgroundImage = savedProfileAvatar ? `url("${savedProfileAvatar}")` : '';
+        avatar.classList.toggle('has-image', Boolean(savedProfileAvatar));
+        avatar.setAttribute('aria-label', savedProfileAvatar ? '已设置头像' : '默认头像');
+      } catch (error) { /* default profile remains usable */ }
+    }
+    function loadSettings() {
+      try {
+        const saved = JSON.parse(localStorage.getItem('shiguang.settings') || 'null');
+        if (!saved) return;
+        if (saved.reminderMode) $('#reminderMode').value = saved.reminderMode;
+        if (saved.aiPrivacy) $('#aiPrivacy').value = saved.aiPrivacy;
+        if (saved.exportFormat) $('#exportFormat').value = saved.exportFormat;
+      } catch (error) { /* default settings remain usable */ }
+    }
+    function loadGoals() {
+      try { goals = JSON.parse(localStorage.getItem('shiguang.goals') || '[]'); } catch (error) { goals = []; }
+      if (!Array.isArray(goals)) goals = [];
+    }
+    function saveGoalsToStorage() {
+      try { localStorage.setItem('shiguang.goals', JSON.stringify(goals)); } catch (error) { /* current session remains usable */ }
+    }
+    function escapeHtml(value) {
+      return String(value).replace(/[&<>"']/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[character]);
+    }
+    function parseDateOnly(value) {
+      const [year, month, day] = String(value || '').split('-').map(Number);
+      return [year, month, day].every(Number.isFinite) ? new Date(year, month - 1, day) : null;
+    }
+    function goalDeadlineInfo(deadline) {
+      const target = parseDateOnly(deadline);
+      if (!target || Number.isNaN(target.getTime())) return null;
+      const today = parseDateOnly(dateKey());
+      const days = Math.round((target - today) / 86400000);
+      const countdown = days > 0 ? `还剩 ${days} 天` : days === 0 ? '今天到期' : `已过期 ${Math.abs(days)} 天`;
+      const state = days < 0 ? 'is-overdue' : days === 0 ? 'is-today' : '';
+      return { countdown, state, dateLabel: `${target.getMonth() + 1} 月 ${target.getDate()} 日截止` };
+    }
+    function renderGoals() {
+      const list = $('#goalList');
+      list.querySelectorAll('.goal-card').forEach(card => card.remove());
+      $('#goalEmpty').style.display = goals.length ? 'none' : 'block';
+      goals.forEach(goal => {
+        const card = document.createElement('article'); card.className = 'goal-card'; card.dataset.goalId = goal.id;
+        const actions = goal.actions.length ? goal.actions.map(action => `<button class="goal-action-chip" data-action-name="${escapeHtml(action)}">${escapeHtml(action)}</button>`).join('') : '<span class="eyebrow" style="margin:0">还没有行动项</span>';
+        const deadline = goalDeadlineInfo(goal.deadline);
+        const deadlineMarkup = deadline ? `<div class="goal-deadline ${deadline.state}"><i data-lucide="calendar-clock"></i><strong>${deadline.countdown}</strong><span>· ${deadline.dateLabel}</span></div>` : '';
+        card.innerHTML = `<div class="goal-card-head"><div class="goal-card-icon"><i data-lucide="${goal.icon || 'sparkles'}"></i></div><div class="goal-card-copy"><h3>${escapeHtml(goal.name)}</h3><p>${escapeHtml(goal.why || '这是你想实现的一个结果')}</p>${deadlineMarkup}</div><button class="goal-card-edit" data-edit-goal="${escapeHtml(goal.id)}">编辑</button></div><div class="goal-actions">${actions}</div>`;
+        list.appendChild(card);
+      });
+      lucide.createIcons({ attrs: { width: 16, height: 16, 'stroke-width': 1.8 } });
+      $$('[data-edit-goal]').forEach(button => button.addEventListener('click', () => openGoalEditor(goals.find(goal => goal.id === button.dataset.editGoal))));
+    }
+    function openGoalEditor(goal = null) {
+      editingGoal = goal;
+      $('#goalModalTitle').textContent = goal ? '编辑目标' : '添加一个目标';
+      $('#goalNameInput').value = goal?.name || '';
+      $('#goalWhyInput').value = goal?.why || '';
+      $('#goalDeadlineInput').value = goal?.deadline || '';
+      $('#goalActionsInput').value = goal?.actions?.join('、') || '';
+      openModal('goalModal');
+    }
+    function dateKey(date = new Date()) {
+      const now = date instanceof Date ? date : new Date(date);
+      const day = [now.getFullYear(), String(now.getMonth() + 1).padStart(2, '0'), String(now.getDate()).padStart(2, '0')].join('-');
+      return day;
+    }
+    function weekdayLabel(date = new Date()) { return ['周日', '周一', '周二', '周三', '周四', '周五', '周六'][new Date(date).getDay()]; }
+    function dateLabel(date = new Date()) { const value = new Date(date); return `${weekdayLabel(value)} · ${value.getMonth() + 1} 月 ${value.getDate()} 日`; }
+    function renderDateLabels() {
+      const todayEyebrow = $('#view-today > .eyebrow');
+      const mealsEyebrow = $('#view-meals > .eyebrow');
+      if (todayEyebrow) todayEyebrow.textContent = dateLabel();
+      if (mealsEyebrow) mealsEyebrow.textContent = `饮食记录 · ${new Date().getMonth() + 1} 月 ${new Date().getDate()} 日`;
+      const themeName = $('#themeDayName');
+      if (themeName) themeName.textContent = themeName.textContent.replace(/^周[一二三四五六日] · /, `${weekdayLabel()} · `);
+    }
+    function dailyFeelingStorageKey(date = null) {
+      const day = date ? dateKey(date) : (selectedReviewDate || dateKey());
+      return `shiguang.dailyFeeling.${day}`;
+    }
+    function loadDailyFeeling(date = null) {
+      try {
+        const saved = localStorage.getItem(dailyFeelingStorageKey(date));
+        return saved ? JSON.parse(saved) : null;
+      } catch (error) { return null; }
+    }
+    function renderDailyFeeling(date = null) {
+      const day = date ? dateKey(date) : (selectedReviewDate || dateKey());
+      const parsedDate = new Date(`${day}T00:00:00`);
+      const isToday = day === dateKey();
+      const hasFeeling = Boolean(dailyFeeling?.text);
+      $('#dailyFeelingTitle').textContent = isToday ? '今日感受' : `${parsedDate.getMonth() + 1} 月 ${parsedDate.getDate()} 日感受`;
+      $('#dailyFeelingText').textContent = hasFeeling ? dailyFeeling.text : `${isToday ? '今天' : '这一天'}还没有写下感受。可以记录一下心情、身体状态，或发生的事。`;
+      $('#dailyFeelingMeta').textContent = hasFeeling ? `已记录 ${new Date(dailyFeeling.updatedAt).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })} · 只对自己可见` : '只对自己可见';
+      $('#editFeeling').textContent = hasFeeling ? '编辑感受' : '记录感受 +';
+    }
+    function openDailyFeelingEditor() {
+      dailyFeeling = loadDailyFeeling(selectedReviewDate);
+      $('#summaryText').value = dailyFeeling?.text || '';
+      $('#aiOutput').classList.remove('show');
+      $('#generateAi').innerHTML = '<i data-lucide="sparkles" style="width:14px;height:14px"></i>保存并生成';
+      setSpeechStatus('点击开始说话');
+      lucide.createIcons({ attrs: { width: 16, height: 16, 'stroke-width': 1.8 } });
+      openModal('summaryModal');
+    }
+    function saveDailyFeeling(closeAfter = true) {
+      if (speechIsListening) stopSpeechRecognition(false);
+      const text = $('#summaryText').value.trim();
+      if (!text) { showToast('先写下或说说今天的感受'); return false; }
+      dailyFeeling = { text, updatedAt: new Date().toISOString() };
+      try { localStorage.setItem(dailyFeelingStorageKey(selectedReviewDate), JSON.stringify(dailyFeeling)); } catch (error) { /* The current session can still show the entry. */ }
+      renderDailyFeeling(selectedReviewDate);
+      renderHistoryDate();
+      renderWeekReview();
+      renderMonthReview();
+      if (closeAfter) closeModals();
+      showToast('今日感受已保存');
+      return true;
+    }
+    const dayRecordPrefix = 'shiguang.dayRecord.';
+    function emptyDayRecord() { return { activities: [], meals: [], plan: { done: 0, total: 0 }, updatedAt: '' }; }
+    function dayRecordStorageKey(date = dateKey()) { return `${dayRecordPrefix}${dateKey(date)}`; }
+    function loadDayRecord(date = dateKey()) {
+      try {
+        const saved = JSON.parse(localStorage.getItem(dayRecordStorageKey(date)) || 'null');
+        if (!saved || typeof saved !== 'object') return emptyDayRecord();
+        return { ...emptyDayRecord(), ...saved, activities: Array.isArray(saved.activities) ? saved.activities : [], meals: Array.isArray(saved.meals) ? saved.meals : [], plan: { ...emptyDayRecord().plan, ...(saved.plan || {}) } };
+      } catch (error) { return emptyDayRecord(); }
+    }
+    function saveDayRecord(date, record) {
+      const next = { ...record, updatedAt: new Date().toISOString() };
+      try { localStorage.setItem(dayRecordStorageKey(date), JSON.stringify(next)); } catch (error) { /* The current session remains usable. */ }
+      return next;
+    }
+    function formatMinutes(minutes) {
+      const value = Math.max(0, Math.round(Number(minutes) || 0));
+      if (!value) return '0m';
+      const hours = Math.floor(value / 60); const remainder = value % 60;
+      return hours ? `${hours}h ${remainder}m` : `${remainder}m`;
+    }
+    function minutesFromTime(value) {
+      const [hour, minute] = String(value || '').split(':').map(Number);
+      return Number.isFinite(hour) && Number.isFinite(minute) ? hour * 60 + minute : 0;
+    }
+    function durationBetweenTimes(start, end) {
+      const from = minutesFromTime(start); let to = minutesFromTime(end);
+      if (to <= from) to += 24 * 60;
+      return Math.max(1, to - from);
+    }
+    function activityCategory(name) {
+      const value = String(name || '');
+      if (/上班|工作|会议|加班/.test(value)) return '工作';
+      if (/阅读|学习|练字/.test(value)) return '成长';
+      if (/健身|打球|瑜伽|体态|训练|护肤|按摩/.test(value)) return '照顾自己';
+      return '生活';
+    }
+    function normalizeHistoryCategory(category, name = '') {
+      if (category === '工作' || category === '生活' || category === '成长' || category === '照顾自己') return category;
+      if (category === '自我照顾' || category === '身体') return '照顾自己';
+      return activityCategory(name);
+    }
+    function categoryClass(category) { return ({ '工作': 'coral', '成长': 'blue', '照顾自己': 'yellow', '生活': 'sage' })[category] || 'blue'; }
+    function activityInterval(activity) {
+      const start = Number.isFinite(Number(activity.startMinute)) ? Number(activity.startMinute) : minutesFromTime(activity.start);
+      let end = Number.isFinite(Number(activity.endMinute)) ? Number(activity.endMinute) : start + (Number(activity.durationMinutes) || 0);
+      if (end <= start) end += 24 * 60;
+      return [start, end];
+    }
+    function unionMinutes(activities) {
+      const intervals = activities.map(activityInterval).filter(([start, end]) => end > start).sort((a, b) => a[0] - b[0]);
+      let total = 0; let current = null;
+      intervals.forEach(([start, end]) => { if (!current) current = [start, end]; else if (start <= current[1]) current[1] = Math.max(current[1], end); else { total += current[1] - current[0]; current = [start, end]; } });
+      return total + (current ? current[1] - current[0] : 0);
+    }
+    function buildDaySummary(date) {
+      const record = loadDayRecord(date);
+      const activities = [...record.activities].sort((a, b) => String(a.start || '').localeCompare(String(b.start || '')));
+      const categories = { '工作': 0, '生活': 0, '成长': 0, '照顾自己': 0 };
+      activities.forEach(activity => { const category = normalizeHistoryCategory(activity.category, activity.name); categories[category] += Number(activity.durationMinutes) || durationBetweenTimes(activity.start, activity.end); });
+      return { record, activities, actualMinutes: unionMinutes(activities), growthMinutes: categories['成长'], categories };
+    }
+    function timelineBlockStyle(activity) {
+      const [start, end] = activityInterval(activity);
+      const dayStart = 6 * 60; const dayEnd = 22 * 60; const span = dayEnd - dayStart;
+      const visibleStart = Math.max(dayStart, Math.min(dayEnd - 1, start));
+      const visibleEnd = Math.max(visibleStart + 1, Math.min(dayEnd, end));
+      const left = Math.max(0, Math.min(92, (visibleStart - dayStart) / span * 100));
+      const width = Math.max(8, Math.min(100 - left, (visibleEnd - visibleStart) / span * 100));
+      return `left:${left.toFixed(2)}%;width:${width.toFixed(2)}%`;
+    }
+    function bindActivityDeleteButtons(scope = document) {
+      $$('[data-delete-activity]', scope).forEach(button => {
+        if (button.dataset.boundDelete === 'true') return;
+        button.dataset.boundDelete = 'true';
+        button.addEventListener('click', event => {
+          event.stopPropagation();
+          deleteActivityRecord(button.dataset.deleteActivity, button.dataset.activityDate || dateKey());
+        });
+      });
+    }
+    function deleteActivityRecord(id, date = dateKey()) {
+      const record = loadDayRecord(date);
+      const index = record.activities.findIndex(activity => activity.id === id);
+      if (index < 0) return;
+      const activity = record.activities[index];
+      const name = activity.name || '这条活动记录';
+      if (!window.confirm(`确定删除「${name}」这条记录吗？`)) return;
+      record.activities.splice(index, 1);
+      saveDayRecord(date, record);
+      refreshSavedRecordViews(date);
+      showToast(`已删除「${name}」`);
+    }
+    function renderTodayTimeline() {
+      const container = $('#timelineRecords');
+      const sample = $('#timelineSample');
+      if (!container) return;
+      const summary = buildDaySummary(dateKey());
+      if (sample) sample.hidden = Boolean(summary.activities.length);
+      container.innerHTML = summary.activities.map(activity => {
+        const category = normalizeHistoryCategory(activity.category, activity.name);
+        const name = activity.name || '未命名活动';
+        return `<div class="timeline-entry"><span class="timeline-time">${escapeHtml(activity.start || '--:--')}</span><div class="timeline-lane"><div class="time-block ${categoryClass(category)}" style="${timelineBlockStyle(activity)}" title="${escapeHtml(name)} · ${formatMinutes(activity.durationMinutes || durationBetweenTimes(activity.start, activity.end))}">${escapeHtml(name)}</div></div><button class="timeline-delete" type="button" data-delete-activity="${escapeHtml(activity.id)}" data-activity-date="${dateKey()}" aria-label="删除${escapeHtml(name)}" title="删除记录"><i data-lucide="trash-2"></i></button></div>`;
+      }).join('');
+      bindActivityDeleteButtons(container);
+      lucide.createIcons({ attrs: { width: 16, height: 16, 'stroke-width': 1.8 } });
+    }
+    function addActivityRecord({ date = dateKey(), name, category, start, end, durationMinutes, note = '' }) {
+      const record = loadDayRecord(date);
+      record.activities.push({ id: `activity-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`, name, category: normalizeHistoryCategory(category, name), start, end, startMinute: minutesFromTime(start), endMinute: minutesFromTime(end), durationMinutes, note });
+      saveDayRecord(date, record);
+      refreshSavedRecordViews(date);
+    }
+    function syncTodayPlanSnapshot() {
+      const taskItems = $$('#planList .plan-item'); const mustItems = $$('#mustDoList .must-check');
+      if (!taskItems.length && !mustItems.length) return;
+      const done = taskItems.filter(item => item.dataset.planDone === 'true').length + mustItems.filter(item => item.checked).length;
+      const total = taskItems.length + mustItems.length;
+      const record = loadDayRecord(); record.plan = { done, total, taskDone: taskItems.filter(item => item.dataset.planDone === 'true').length, taskTotal: taskItems.length, mustDone: mustItems.filter(item => item.checked).length, mustTotal: mustItems.length }; saveDayRecord(dateKey(), record);
+    }
+    function renderMealGrid() {
+      const grid = $('#mealGrid'); if (!grid) return;
+      const meals = loadDayRecord().meals;
+      $$('.meal-item', grid).forEach(item => {
+        const type = item.dataset.mealType || item.dataset.newMealType;
+        const saved = [...meals].reverse().find(meal => meal.type === type);
+        if (!saved) return;
+        item.dataset.mealId = saved.id;
+        item.dataset.mealType = saved.type;
+        item.dataset.mealContent = saved.content;
+        item.dataset.mealFeel = saved.feel || '已记录';
+        delete item.dataset.newMealType;
+        const copy = $('.meal-copy', item);
+        if (copy) {
+          $('strong', copy).textContent = `${saved.type} · ${saved.content}`;
+          $('p', copy).textContent = `${saved.time || '今天'} · ${saved.feel || '已记录'} · 记录完整`;
+        }
+        item.setAttribute('aria-label', `编辑${saved.type}：${saved.content}`);
+      });
+    }
+    function refreshSavedRecordViews(date = dateKey()) {
+      renderTodaySummary();
+      if (selectedReviewDate === dateKey(date)) renderHistoryDate();
+      renderWeekReview();
+      renderMonthReview();
+    }
+    function renderTodaySummary() {
+      const summary = buildDaySummary(dateKey());
+      $('#recordedTotal').textContent = formatMinutes(summary.actualMinutes);
+      $('#recordProgress').style.width = `${Math.min(100, Math.round(summary.actualMinutes / (8 * 60) * 100))}%`;
+      const footer = $$('.summary-footer span');
+      if (footer[0]) footer[0].textContent = `成长投入 ${formatMinutes(summary.growthMinutes)}`;
+      const plan = summary.record.plan || { done: 0, total: 0 };
+      if (footer[1]) footer[1].textContent = `计划完成 ${plan.done} / ${plan.total}`;
+      renderTodayTimeline();
+      renderMealGrid();
+      renderCalendar();
+    }
+    function renderHistoryDate() {
+      if (!selectedReviewDate) selectedReviewDate = dateKey();
+      if (selectedReviewDate === dateKey()) syncTodayPlanSnapshot();
+      const summary = buildDaySummary(selectedReviewDate);
+      const date = new Date(`${selectedReviewDate}T00:00:00`);
+      $('#reviewDateInput').value = selectedReviewDate;
+      $('#historyActual').textContent = formatMinutes(summary.actualMinutes);
+      $('#historyGrowth').textContent = formatMinutes(summary.growthMinutes);
+      $('#historyPlan').textContent = `${summary.record.plan.done || 0} / ${summary.record.plan.total || 0}`;
+      $('#historyActualHint').textContent = summary.activities.length ? `${summary.activities.length} 段活动（重叠已去重）` : '暂无时间记录';
+      $('#historyGrowthHint').textContent = summary.growthMinutes ? '阅读 / 学习投入' : '等待成长记录';
+      $('#historyPlanHint').textContent = summary.record.plan.total ? '计划完成情况' : '这天没有计划快照';
+      $('#historyBreakdownHint').textContent = `${date.getMonth() + 1} 月 ${date.getDate()} 日 · 并行活动会分别展示`;
+      Object.entries({ work: '工作', life: '生活', growth: '成长', care: '照顾自己' }).forEach(([key, category]) => { const width = summary.actualMinutes ? Math.min(100, Math.round(summary.categories[category] / summary.actualMinutes * 100)) : 0; $(`#history${key[0].toUpperCase() + key.slice(1)}Bar`).style.width = `${width}%`; $(`#history${key[0].toUpperCase() + key.slice(1)}Value`).textContent = formatMinutes(summary.categories[category]); });
+      const list = $('#historyRecordList');
+      list.innerHTML = summary.activities.length ? summary.activities.map(activity => `<div class="history-record"><span class="history-record-time">${escapeHtml(activity.start || '--:--')}</span><div class="history-record-copy"><strong>${escapeHtml(activity.name || '未命名活动')}</strong><small>${formatMinutes(activity.durationMinutes || durationBetweenTimes(activity.start, activity.end))}</small></div><span class="history-record-tag">${escapeHtml(normalizeHistoryCategory(activity.category, activity.name))}</span><button class="history-delete" type="button" data-delete-activity="${escapeHtml(activity.id)}" data-activity-date="${escapeHtml(selectedReviewDate)}" aria-label="删除${escapeHtml(activity.name || '这条活动记录')}" title="删除记录"><i data-lucide="trash-2"></i></button></div>`).join('') : '<div class="history-empty">这一天还没有时间记录。记录一段活动后，就会沉淀在这里。</div>';
+      bindActivityDeleteButtons(list);
+      lucide.createIcons({ attrs: { width: 16, height: 16, 'stroke-width': 1.8 } });
+      $('#historyRecordCount').textContent = summary.activities.length ? `${summary.activities.length} 条记录` : '暂无记录';
+      const mealList = $('#historyMealList'); const meals = [...summary.record.meals].sort((a, b) => String(a.time || '').localeCompare(String(b.time || '')));
+      mealList.innerHTML = meals.length ? meals.map(meal => `<div class="history-record"><span class="history-record-time">${escapeHtml(meal.time || '--:--')}</span><div class="history-record-copy"><strong>${escapeHtml(meal.type || '饮食')}</strong><small>${escapeHtml(meal.content)} · ${escapeHtml(meal.feel || '已记录')}</small></div><span class="history-record-tag">饮食</span></div>`).join('') : '<div class="history-empty">饮食记录会和这一天一起保存，方便之后回看状态。</div>';
+      $('#historyMealCount').textContent = meals.length ? `${meals.length} 条记录` : '暂无记录';
+      const feeling = loadDailyFeeling(selectedReviewDate);
+      $('#reviewHeadline').textContent = feeling?.text ? '你已经把这一天留了下来。' : (summary.activities.length ? '你正在用记录，看见自己的节奏。' : '记录完成后，这里会形成你的当天总结。');
+      $('#reviewSummary').textContent = feeling?.text ? feeling.text : (summary.activities.length ? `今天保存了 ${summary.activities.length} 段活动，共 ${formatMinutes(summary.actualMinutes)}；成长投入 ${formatMinutes(summary.growthMinutes)}。继续记录感受后，AI 会帮你整理得更清楚。` : '先记录几段活动、饮食和感受，AI 会根据真实数据帮你整理今天的节奏。');
+      $('#dayInsightHeadline').textContent = summary.activities.length ? `今天留下了 ${summary.activities.length} 段真实记录` : '从一段记录开始';
+      $('#dayInsightCopy').textContent = summary.activities.length ? `实际经过 ${formatMinutes(summary.actualMinutes)}。${summary.growthMinutes ? `成长投入 ${formatMinutes(summary.growthMinutes)}，` : ''}并行活动会分开呈现，同时在总时长中去重。` : '记录活动后，这里会看见你这一天的投入和节奏。';
+      dailyFeeling = loadDailyFeeling(selectedReviewDate);
+      renderDailyFeeling(selectedReviewDate);
+      const dayReview = loadReview('day', selectedReviewDate);
+      const dayReviewFields = { wins: '#dayReviewWins', strength: '#dayReviewStrength', improve: '#dayReviewImprove', next: '#dayReviewNext' };
+      Object.entries(dayReviewFields).forEach(([key, selector]) => { const field = $(selector); if (field && document.activeElement !== field) field.value = key === 'improve' ? (dayReview.improve || dayReview.stuck || '') : (dayReview[key] || ''); });
+      $('#dayReviewSaveState').textContent = dayReview.updatedAt ? `已保存 ${new Date(dayReview.updatedAt).toLocaleDateString('zh-CN', { month: 'numeric', day: 'numeric' })}` : '未填写';
+    }
+    function shiftReviewDate(offset) {
+      const date = new Date(`${selectedReviewDate}T00:00:00`);
+      date.setDate(date.getDate() + offset);
+      selectedReviewDate = dateKey(date);
+      renderHistoryDate();
+      renderWeekReview();
+    }
+    const reviewStoragePrefix = 'shiguang.review.';
+    function reviewStorageKey(type, period) { return `${reviewStoragePrefix}${type}.${period}`; }
+    function emptyReview() { return { wins: '', strength: '', improve: '', stuck: '', lesson: '', next: '', pattern: '', adjust: '', memo: '', observeWins: '', observeStuck: '', observeBody: '', observeMoney: '', observeMood: '', observeSelf: '', actions: [], updatedAt: '' }; }
+    function loadReview(type, period) {
+      try {
+        const saved = JSON.parse(localStorage.getItem(reviewStorageKey(type, period)) || 'null');
+        return saved && typeof saved === 'object' ? { ...emptyReview(), ...saved } : emptyReview();
+      } catch (error) { return emptyReview(); }
+    }
+    function saveReview(type, period, review) {
+      const next = { ...emptyReview(), ...review, updatedAt: new Date().toISOString() };
+      try { localStorage.setItem(reviewStorageKey(type, period), JSON.stringify(next)); } catch (error) { /* current session remains usable */ }
+      return next;
+    }
+    function reviewHasContent(review) { return ['wins', 'strength', 'improve', 'stuck', 'lesson', 'next', 'pattern', 'adjust', 'memo', 'observeWins', 'observeStuck', 'observeBody', 'observeMoney', 'observeMood', 'observeSelf'].some(key => String(review?.[key] || '').trim()) || Boolean(review?.actions?.length); }
+    function weekDatesForAnchor(anchorDate) {
+      const anchor = new Date(anchorDate); const monday = new Date(anchor); const day = monday.getDay();
+      monday.setDate(monday.getDate() + (day === 0 ? -6 : 1 - day));
+      return Array.from({ length: 7 }, (_, index) => { const date = new Date(monday); date.setDate(monday.getDate() + index); return date; });
+    }
+    function weekReviewPeriod(date) { return dateKey(weekDatesForAnchor(date)[0]); }
+    function monthReviewPeriod(date) { const value = new Date(date); return `${value.getFullYear()}-${String(value.getMonth() + 1).padStart(2, '0')}`; }
+    function monthReviewDate(offset = monthReviewOffset) { const date = new Date(); date.setDate(1); date.setMonth(date.getMonth() + offset); return date; }
+    function monthLabel(date) { return `${date.getFullYear()} 年 ${date.getMonth() + 1} 月`; }
+    function renderReviewTrace(dateList, target, emptyText = '还没有日复盘记录。', onlyWithData = false) {
+      const container = $(target); if (!container) return;
+      const rows = dateList.map(date => {
+        const summary = buildDaySummary(date); const feeling = loadDailyFeeling(date); const dayReview = loadReview('day', dateKey(date)); const hasData = summary.activities.length || summary.record.meals.length || summary.record.plan.done || feeling?.text || reviewHasContent(dayReview);
+        return { date, summary, feeling, dayReview, hasData };
+      });
+      const visibleRows = onlyWithData ? rows.filter(row => row.hasData) : rows;
+      container.innerHTML = visibleRows.length ? visibleRows.map(row => `<button class="review-trace-row" type="button" data-trace-date="${dateKey(row.date)}"><span class="review-trace-date">${row.date.getMonth() + 1}月${row.date.getDate()}日</span><span class="review-trace-copy"><strong>${row.hasData ? `${formatMinutes(row.summary.actualMinutes)} · ${row.summary.activities.length ? `${row.summary.activities.length} 段活动` : '有计划或感受'}` : '暂无记录'}</strong><small>${row.feeling?.text ? escapeHtml(row.feeling.text.slice(0, 34)) : row.dayReview?.wins ? escapeHtml(row.dayReview.wins.slice(0, 34)) : row.summary.activities.slice(0, 2).map(activity => escapeHtml(activity.name || '未命名活动')).join('、') || '点击进入日复盘补上这一天'}</small></span><span class="review-trace-state">${row.hasData ? '已留下' : '待回看'} <i data-lucide="chevron-right" style="width:12px;height:12px"></i></span></button>`).join('') : `<div class="history-empty">${emptyText}</div>`;
+      $$('[data-trace-date]', container).forEach(button => button.addEventListener('click', () => { selectedReviewDate = button.dataset.traceDate; renderHistoryDate(); activateReviewTab('day'); }));
+    }
+    function renderWeekReviewTemplate(week, summaries) {
+      const period = weekReviewPeriod(week[0]); const review = loadReview('week', period);
+      const fields = { wins: '#weekReviewWins', stuck: '#weekReviewStuck', lesson: '#weekReviewLesson', next: '#weekReviewNext', observeWins: '#weekObserveWins', observeStuck: '#weekObserveStuck', observeBody: '#weekObserveBody', observeMoney: '#weekObserveMoney', observeMood: '#weekObserveMood', observeSelf: '#weekObserveSelf' };
+      Object.entries(fields).forEach(([key, selector]) => { const field = $(selector); if (field && document.activeElement !== field) field.value = review[key] || ''; });
+      $('#weekReviewSaveState').textContent = review.updatedAt ? `已保存 ${new Date(review.updatedAt).toLocaleDateString('zh-CN', { month: 'numeric', day: 'numeric' })}` : '未填写';
+      renderWeekActions(review.actions);
+      renderReviewTrace(week, '#weekDayTrace');
+    }
+    function renderWeekActions(actions = []) {
+      const list = $('#weekActionList'); if (!list) return;
+      list.innerHTML = actions.length ? actions.map(action => `<label class="week-next-action-row${action.done ? ' done' : ''}"><input type="checkbox" data-week-action-id="${escapeHtml(action.id)}"${action.done ? ' checked' : ''}><span>${escapeHtml(action.text)}</span><small>${escapeHtml(action.date || '')} · ${escapeHtml(action.priority || '中')}</small></label>`).join('') : '<span class="eyebrow" style="margin:2px 0 0">还没有添加下周待办。</span>';
+      $$('[data-week-action-id]', list).forEach(input => input.addEventListener('change', () => {
+        const period = weekReviewPeriod(selectedReviewDate); const review = loadReview('week', period); const action = review.actions.find(item => item.id === input.dataset.weekActionId);
+        if (!action) return; action.done = input.checked; saveReview('week', period, review); renderWeekActions(review.actions);
+      }));
+    }
+    function renderMonthReview() {
+      const current = monthReviewDate(); const period = monthReviewPeriod(current); const review = loadReview('month', period);
+      $('#monthReviewRange').textContent = monthLabel(current); $('#monthReviewSubtitle').textContent = `${current.getMonth() + 1} 月的坚持与调整`;
+      const monthStart = new Date(current.getFullYear(), current.getMonth(), 1); const monthEnd = new Date(current.getFullYear(), current.getMonth() + 1, 0);
+      const dates = Array.from({ length: monthEnd.getDate() }, (_, index) => new Date(current.getFullYear(), current.getMonth(), index + 1));
+      const summaries = dates.map(date => ({ date, summary: buildDaySummary(date), feeling: loadDailyFeeling(date) }));
+      const totalMinutes = summaries.reduce((sum, item) => sum + item.summary.actualMinutes, 0); const recordDays = summaries.filter(item => item.summary.activities.length || item.summary.record.meals.length || item.summary.record.plan.done || item.feeling?.text).length;
+      const weekStarts = []; let cursor = new Date(monthStart); cursor.setDate(cursor.getDate() - ((cursor.getDay() + 6) % 7));
+      while (cursor <= monthEnd) { weekStarts.push(new Date(cursor)); cursor.setDate(cursor.getDate() + 7); }
+      const weekRows = weekStarts.map(start => { const week = weekDatesForAnchor(start); const weekSummaries = week.map(date => ({ date, summary: buildDaySummary(date) })); const minutes = weekSummaries.reduce((sum, item) => sum + item.summary.actualMinutes, 0); const saved = loadReview('week', weekReviewPeriod(start)); return { start, minutes, saved, week }; });
+      const reviewedWeeks = weekRows.filter(item => reviewHasContent(item.saved)).length;
+      $('#monthRecorded').textContent = formatMinutes(totalMinutes); $('#monthRecordedHint').textContent = `${recordDays} 天有记录`; $('#monthRecordDays').textContent = `${recordDays} 天`; $('#monthRecordDaysHint').textContent = totalMinutes ? `${formatMinutes(totalMinutes)} 真实经过` : '从日复盘汇总'; $('#monthReviewedWeeks').textContent = `${reviewedWeeks} / ${weekRows.length}`;
+      const monthFields = { wins: '#monthReviewWins', pattern: '#monthReviewPattern', adjust: '#monthReviewAdjust', memo: '#monthReviewMemo' };
+      Object.entries(monthFields).forEach(([key, selector]) => { const field = $(selector); if (field && document.activeElement !== field) field.value = review[key] || ''; });
+      $('#monthReviewSaveState').textContent = review.updatedAt ? `已保存 ${new Date(review.updatedAt).toLocaleDateString('zh-CN', { month: 'numeric', day: 'numeric' })}` : '未填写';
+      renderMonthActionGrid(summaries, review);
+      $('#monthWeekCount').textContent = `${weekRows.length} 周 · ${reviewedWeeks} 周已填写`;
+      $('#monthWeekList').innerHTML = weekRows.map(item => `<button class="month-week-row" type="button" data-month-week="${dateKey(item.start)}"><span class="month-week-label">${item.start.getMonth() + 1}月${item.start.getDate()}日周</span><span class="month-week-copy"><strong>${formatMinutes(item.minutes)} 真实经过</strong><small>${item.saved.wins ? escapeHtml(item.saved.wins.split('\n')[0].slice(0, 42)) : '还没有填写周复盘模板'}</small></span><span class="month-week-state">${reviewHasContent(item.saved) ? '已复盘' : '待复盘'} <i data-lucide="chevron-right" style="width:12px;height:12px"></i></span></button>`).join('');
+      renderReviewTrace(dates, '#monthDayTrace', '这个月还没有日复盘记录。', true);
+      $$('[data-month-week]').forEach(button => button.addEventListener('click', () => { selectedReviewDate = button.dataset.monthWeek; activateReviewTab('week'); renderWeekReview(); }));
+      lucide.createIcons({ attrs: { width: 16, height: 16, 'stroke-width': 1.8 } });
+    }
+    function renderMonthActionGrid(summaries, review) {
+      const container = $('#monthActionGrid'); if (!container) return;
+      const activities = summaries.flatMap(item => item.summary.activities);
+      const cards = [
+        ['健康', '照顾自己 · 运动 · 睡眠', 'sage', activities.filter(item => normalizeHistoryCategory(item.category, item.name) === '照顾自己').reduce((sum, item) => sum + weekActivityDuration(item), 0)],
+        ['阅读 / 学习', '阅读 · 学习 · 输入', 'green', activities.filter(item => /阅读|学习|练字/.test(item.name || '')).reduce((sum, item) => sum + weekActivityDuration(item), 0)],
+        ['事业 / 输出', '工作 · 专注 · 创造', 'blue', activities.filter(item => normalizeHistoryCategory(item.category, item.name) === '工作').reduce((sum, item) => sum + weekActivityDuration(item), 0)],
+        ['金钱', '收支 · 储蓄 · 投资', 'coral', 0],
+        ['兴趣 / 娱乐', '放松 · 体验 · 玩乐', 'purple', activities.filter(item => /玩手机|逛街|娱乐|游戏/.test(item.name || '')).reduce((sum, item) => sum + weekActivityDuration(item), 0)],
+        ['家人 / 朋友', '关系 · 陪伴 · 连接', 'yellow', 0]
+      ];
+      container.innerHTML = cards.map(([name, hint, color, minutes]) => `<div class="month-action-card ${color}"><strong>${name}</strong><small>${minutes ? `记录投入 ${formatMinutes(minutes)}` : hint}</small><textarea data-month-action="${name}" placeholder="这个月在${name}上发生了什么？"></textarea></div>`).join('');
+      cards.forEach(([name]) => { const field = $(`[data-month-action="${name}"]`, container); if (field) field.value = review.actionsByArea?.[name] || ''; });
+    }
+    const weekCategoryMeta = {
+      '工作': { css: 'coral' },
+      '生活': { css: 'sage' },
+      '成长': { css: 'blue' },
+      '照顾自己': { css: 'yellow' }
+    };
+    function weekActivityDuration(activity) {
+      return Number(activity.durationMinutes) || durationBetweenTimes(activity.start, activity.end);
+    }
+    function weekActivityRows(summaries) {
+      return summaries.flatMap(item => item.summary.activities.map(activity => ({
+        date: item.date,
+        name: activity.name || '未命名活动',
+        category: normalizeHistoryCategory(activity.category, activity.name),
+        minutes: weekActivityDuration(activity)
+      })));
+    }
+    function renderWeekTimeline(summaries) {
+      const container = $('#weekTimeline');
+      if (!container) return;
+      const dayLabels = ['一', '二', '三', '四', '五', '六', '日'];
+      const header = `<div></div>${summaries.map((item, index) => `<button class="week-calendar-header-day${item.key === dateKey() ? ' today' : ''}" type="button" data-week-date="${item.key}" aria-label="查看${dateLabel(item.date)}"><strong>周${dayLabels[index]}</strong><small>${item.date.getMonth() + 1}/${item.date.getDate()}</small></button>`).join('')}`;
+      const timeLabels = [6, 8, 10, 12, 14, 16, 18, 20, 22, 24].map(hour => `<span style="top:${((hour - 6) / 18) * 100}%">${String(hour).padStart(2, '0')}:00</span>`).join('');
+      const days = summaries.map(item => {
+        const activities = item.summary.activities.map(activity => { const [start, end] = activityInterval(activity); return { ...activity, start, end: Math.max(start + 1, end), startLabel: activity.start, endLabel: activity.end }; }).filter(activity => activity.end > 6 * 60 && activity.start < 24 * 60).sort((a, b) => a.start - b.start);
+        const lanes = [];
+        activities.forEach(activity => { let lane = lanes.findIndex(lastEnd => activity.start >= lastEnd); if (lane < 0) { lane = lanes.length; lanes.push(activity.end); } else lanes[lane] = activity.end; activity.lane = lane; });
+        const laneCount = Math.max(1, lanes.length);
+        const blocks = activities.map(activity => { const start = Math.max(6 * 60, activity.start); const end = Math.min(24 * 60, activity.end); const top = ((start - 6 * 60) / (18 * 60)) * 720; const height = Math.max(24, ((end - start) / (18 * 60)) * 720); const width = 100 / laneCount; const category = normalizeHistoryCategory(activity.category, activity.name); return `<div class="week-calendar-block ${categoryClass(category)}" style="top:${top.toFixed(1)}px;height:${Math.min(height, 720 - top).toFixed(1)}px;left:${(activity.lane * width).toFixed(1)}%;width:${Math.max(18, width - 2).toFixed(1)}%" title="${escapeHtml(activity.name)} · ${escapeHtml(activity.startLabel || '--:--')} - ${escapeHtml(activity.endLabel || '--:--')}">${escapeHtml(activity.name)}<br><small>${escapeHtml(activity.startLabel || '')} - ${escapeHtml(activity.endLabel || '')}</small></div>`; }).join(''); return `<div class="week-calendar-day${item.key === dateKey() ? ' today' : ''}">${blocks}</div>`;
+      }).join('');
+      container.innerHTML = `<div class="week-calendar-header">${header}</div><div class="week-calendar-body"><div class="week-calendar-time">${timeLabels}</div>${days}</div>`;
+      $$('[data-week-date]', container).forEach(button => button.addEventListener('click', () => { selectedReviewDate = button.dataset.weekDate; renderHistoryDate(); activateReviewTab('day'); }));
+    }
+    const skinDimensions = [
+      { key: 'oil', input: '#skinOil', score: '#skinOilScore', label: '水油平衡' },
+      { key: 'tone', input: '#skinTone', score: '#skinToneScore', label: '肤色状态' },
+      { key: 'sensitive', input: '#skinSensitive', score: '#skinSensitiveScore', label: '敏感稳定' },
+      { key: 'smooth', input: '#skinSmooth', score: '#skinSmoothScore', label: '光滑度' },
+      { key: 'age', input: '#skinAge', score: '#skinAgeScore', label: '年轻状态' }
+    ];
+    function skinStorageKey(date) { return `shiguang.skin.${dateKey(date)}`; }
+    function loadSkinCheck(date) {
+      try {
+        const saved = JSON.parse(localStorage.getItem(skinStorageKey(date)) || 'null');
+        if (!saved || typeof saved !== 'object') return null;
+        if (!saved.scale && skinDimensions.every(item => Number(saved[item.key]) >= 0 && Number(saved[item.key]) <= 5)) {
+          skinDimensions.forEach(item => { saved[item.key] = Math.round(Number(saved[item.key]) * 20); });
+          saved.scale = 100;
+          try { localStorage.setItem(skinStorageKey(date), JSON.stringify(saved)); } catch (error) { /* current session remains usable */ }
+        }
+        return saved;
+      } catch (error) { return null; }
+    }
+    function saveSkinCheck(date, values) {
+      const next = { ...values, scale: 100, updatedAt: new Date().toISOString() };
+      try { localStorage.setItem(skinStorageKey(date), JSON.stringify(next)); } catch (error) { /* current session remains usable */ }
+      return next;
+    }
+    function skinWeekSummary(week) {
+      const rows = week.map(date => ({ date, data: loadSkinCheck(date) })).filter(row => row.data);
+      const averages = Object.fromEntries(skinDimensions.map(item => [item.key, rows.length ? rows.reduce((sum, row) => sum + Number(row.data[item.key] || 0), 0) / rows.length : 0]));
+      const total = Object.values(averages).reduce((sum, value) => sum + value, 0);
+      return { rows, averages, overall: total ? total / skinDimensions.length : 0 };
+    }
+    function renderSkinInputs(date) {
+      const data = loadSkinCheck(date) || {};
+      skinDimensions.forEach(item => { const input = $(item.input); if (input) input.value = data[item.key] ?? 60; });
+      $('#skinSelectedDate').textContent = `记录 ${new Date(date).getMonth() + 1} 月 ${new Date(date).getDate()} 日 · 0-100 分，分数越高代表当前状态越稳定`;
+      skinDimensions.forEach(item => { const score = $(item.score); const input = $(item.input); if (score && input) score.textContent = input.value; });
+    }
+    function renderSkinRadar(values) {
+      const radar = $('#skinRadar'); if (!radar) return;
+      const anchors = [[50, 5], [93, 35], [76, 85], [24, 85], [7, 35]];
+      const points = anchors.map(([x, y], index) => { const value = Math.max(0, Math.min(100, Number(values[index]) || 0)) / 100; return `${(50 + (x - 50) * value).toFixed(1)}% ${(50 + (y - 50) * value).toFixed(1)}%`; });
+      points.forEach((point, index) => radar.style.setProperty(`--skin-p${index + 1}`, point));
+      radar.setAttribute('aria-label', `皮肤五维状态图，${values.map(value => Math.round(Number(value) || 0)).join('、')} 分`);
+    }
+    function renderWeekSkin(week) {
+      const summary = skinWeekSummary(week); const dayNames = ['一', '二', '三', '四', '五', '六', '日'];
+      $('#skinWeekAverage').textContent = summary.overall ? `${summary.overall.toFixed(1)} / 100` : '--';
+      $('#skinDays').innerHTML = week.map((date, index) => { const data = loadSkinCheck(date); const active = dateKey(date) === dateKey(selectedReviewDate); return `<button class="skin-day${active ? ' active' : ''}${data ? ' recorded' : ''}" type="button" data-skin-date="${dateKey(date)}" aria-label="记录周${dayNames[index]}皮肤状态"><span>周${dayNames[index]}</span><strong>${date.getDate()}</strong><small>${data ? '已记' : '待记'}</small></button>`; }).join('');
+      skinDimensions.forEach((item, index) => { const value = summary.averages[item.key]; const label = $('.skin-radar-label.' + ['top', 'right', 'bottom-right', 'bottom-left', 'left'][index]); if (label) label.textContent = `${item.label} ${value ? value.toFixed(1) : '--'}`; });
+      $$('[data-skin-date]').forEach(button => button.addEventListener('click', () => { selectedReviewDate = button.dataset.skinDate; renderSkinInputs(selectedReviewDate); renderWeekSkin(week); }));
+      renderSkinInputs(selectedReviewDate);
+      renderSkinRadar(skinDimensions.map(item => summary.averages[item.key]));
+    }
+    function renderWeekGoals(weekActivities, summaries) {
+      const container = $('#weekGoalList');
+      if (!container) return;
+      const goals = [
+        { name: '阅读投入', target: 180, value: weekActivities.filter(item => /阅读/.test(item.name)).reduce((sum, item) => sum + item.minutes, 0), unit: '分钟' },
+        { name: '学习投入', target: 180, value: weekActivities.filter(item => /学习|练字/.test(item.name)).reduce((sum, item) => sum + item.minutes, 0), unit: '分钟' },
+        { name: '身体活动', target: 120, value: weekActivities.filter(item => /健身|打球|瑜伽|训练|体态/.test(item.name)).reduce((sum, item) => sum + item.minutes, 0), unit: '分钟' },
+        { name: '留下记录', target: 5, value: summaries.filter(item => item.summary.activities.length > 0).length, unit: '天' }
+      ];
+      container.innerHTML = goals.map((goal, index) => {
+        const percent = Math.min(100, Math.round(goal.value / goal.target * 100));
+        const value = goal.unit === '分钟' ? formatMinutes(goal.value) : `${goal.value} ${goal.unit}`;
+        const target = goal.unit === '分钟' ? formatMinutes(goal.target) : `${goal.target} ${goal.unit}`;
+        return `<div class="week-goal-row"><span class="week-goal-index">${index + 1}</span><div class="week-goal-copy"><strong>${goal.name}</strong><small>${value} / ${target}</small><div class="week-goal-track"><div class="week-goal-fill" style="width:${percent}%"></div></div></div><span class="week-goal-progress${percent >= 100 ? ' done' : ''}">${percent}%</span></div>`;
+      }).join('');
+    }
+    function renderWeekReview() {
+      const anchor = new Date(`${selectedReviewDate || dateKey()}T00:00:00`);
+      const monday = new Date(anchor); const day = monday.getDay(); monday.setDate(monday.getDate() + (day === 0 ? -6 : 1 - day));
+      const week = Array.from({ length: 7 }, (_, index) => { const date = new Date(monday); date.setDate(monday.getDate() + index); return date; });
+      const summaries = week.map(date => ({ date, key: dateKey(date), summary: buildDaySummary(date) }));
+      $('#weekReviewRange').textContent = `${week[0].getMonth() + 1} 月 ${week[0].getDate()} 日 - ${week[6].getMonth() + 1} 月 ${week[6].getDate()} 日`;
+      const totalMinutes = summaries.reduce((sum, item) => sum + item.summary.actualMinutes, 0);
+      const recordDays = summaries.filter(item => item.summary.activities.length || item.summary.record.meals.length || item.summary.record.plan.done).length;
+      const weekActivities = weekActivityRows(summaries);
+      const activityMinutes = weekActivities.reduce((sum, activity) => sum + activity.minutes, 0);
+      const trainingMinutes = weekActivities.filter(activity => /健身|打球|瑜伽|训练|体态/.test(activity.name)).reduce((sum, activity) => sum + activity.minutes, 0);
+      const readingMinutes = weekActivities.filter(activity => /阅读/.test(activity.name)).reduce((sum, activity) => sum + activity.minutes, 0);
+      $('#weekRecorded').textContent = formatMinutes(totalMinutes);
+      $('#weekRecordedHint').textContent = `${recordDays} 天有记录`;
+      $('#weekTraining').textContent = `${weekActivities.filter(activity => /健身|打球|瑜伽|训练|体态/.test(activity.name)).length} 次`;
+      $('#weekTrainingHint').textContent = trainingMinutes ? `${formatMinutes(trainingMinutes)} 投入` : '等待记录';
+      $('#weekReading').textContent = formatMinutes(readingMinutes);
+      $('#weekReadingHint').textContent = readingMinutes ? '阅读投入' : '等待记录';
+      renderWeekGoals(weekActivities, summaries);
+      renderWeekSkin(week);
+      renderWeekTimeline(summaries);
+      const categoryTotals = Object.keys(weekCategoryMeta).map(category => ({ category, minutes: weekActivities.filter(activity => activity.category === category).reduce((sum, activity) => sum + activity.minutes, 0), ...weekCategoryMeta[category] })).sort((a, b) => b.minutes - a.minutes);
+      const topCategory = categoryTotals.find(item => item.minutes > 0);
+      const allocationStops = activityMinutes ? (() => { let cursor = 0; return categoryTotals.filter(item => item.minutes > 0).map(item => { const start = cursor / activityMinutes * 100; cursor += item.minutes; return `${item.color} ${start.toFixed(2)}% ${(cursor / activityMinutes * 100).toFixed(2)}%`; }).join(', '); })() : 'var(--line)';
+      $('#weekDonut').style.background = activityMinutes ? `conic-gradient(${allocationStops})` : 'var(--line)';
+      $('#weekDonut').setAttribute('aria-label', activityMinutes ? `本周活动投入 ${formatMinutes(activityMinutes)}，最多是${topCategory.category} ${formatMinutes(topCategory.minutes)}` : '本周还没有活动记录');
+      $('#weekAllocationTotal').textContent = formatMinutes(activityMinutes);
+      $('#weekAllocationRange').textContent = `${week[0].getMonth() + 1}月${week[0].getDate()}日 - ${week[6].getMonth() + 1}月${week[6].getDate()}日`;
+      $('#weekAllocationCaption').textContent = activityMinutes ? `最多投入在${topCategory.category} · 点击类别查看明细` : '记录活动后，这里会显示时间占比。';
+      $('#weekCategoryList').innerHTML = categoryTotals.map(item => { const share = activityMinutes ? Math.round(item.minutes / activityMinutes * 100) : 0; const pressed = weekCategoryFilter === item.category; return `<button class="week-category-button" type="button" data-week-filter="${item.category}" aria-pressed="${pressed}"><span class="week-category-swatch" style="background:${item.color}"></span><span class="week-category-copy"><span class="week-category-name">${item.category}</span><span class="week-category-meta"><span class="week-category-track"><span class="week-category-fill" style="width:${share}%;background:${item.color}"></span></span><span class="week-category-value">${formatMinutes(item.minutes)}</span></span></span><span class="week-category-share">${share}%</span></button>`; }).join('');
+      const analysisTitle = activityMinutes ? (topCategory.minutes / activityMinutes >= .5 ? `${topCategory.category} 是本周主要投入` : `本周投入主要分布在${topCategory.category}和其他活动`) : '从一段记录开始';
+      const analysisCopy = activityMinutes ? `按活动记录时长统计，${topCategory.category}占 ${Math.round(topCategory.minutes / activityMinutes * 100)}%（${formatMinutes(topCategory.minutes)}）。顶部“真实经过”会把重叠时段去重，分布图则保留每段活动的投入。` : '记录活动后，这里会分析你把时间花在了哪里。';
+      $('#weekAnalysisNote').innerHTML = `<i data-lucide="${activityMinutes ? 'sparkles' : 'circle-plus'}"></i><div><strong>${analysisTitle}</strong><p>${analysisCopy}</p></div>`;
+      $$('[data-week-date]').forEach(button => button.addEventListener('click', () => { selectedReviewDate = button.dataset.weekDate; renderHistoryDate(); activateReviewTab('day'); }));
+      renderWeekReviewTemplate(week, summaries);
+      lucide.createIcons({ attrs: { width: 16, height: 16, 'stroke-width': 1.8 } });
+    }
+    function renderRecipeSet() {
+      const row = $('#recipeRow'); if (!row) return;
+      const recipes = recipeSets[recipeSetIndex % recipeSets.length];
+      row.innerHTML = recipes.map(recipe => `<button class="recipe" type="button" data-recipe-name="${escapeHtml(recipe.name)}" aria-label="记录晚餐：${escapeHtml(recipe.name)}"><div class="recipe-top"><i class="recipe-icon" data-lucide="${recipe.icon}"></i><span class="eyebrow" style="margin:0">${recipe.time}</span></div><h3>${escapeHtml(recipe.name)}</h3><p>${escapeHtml(recipe.ingredients)}</p></button>`).join('');
+      $$('.recipe[data-recipe-name]', row).forEach(item => item.addEventListener('click', () => openMealEditor(null, '晚餐', item.dataset.recipeName)));
+      lucide.createIcons({ attrs: { width: 16, height: 16, 'stroke-width': 1.8 } });
+    }
+    function openMealEditor(item = null, newType = '', presetContent = '') {
+      editingMeal = item;
+      const type = item ? (item.dataset.mealType || item.dataset.newMealType) : (newType || '晚餐');
+      $('#mealTitle').textContent = item?.dataset.mealContent ? `编辑${type}` : `记录${type}`;
+      $('#mealType').value = type;
+      $('#mealContent').value = item ? item.dataset.mealContent : presetContent;
+      $('#mealFeel').value = item ? item.dataset.mealFeel : '刚刚好';
+      openModal('mealModal');
+    }
+    function bindMealItem(item) {
+      if (item.dataset.boundMeal === 'true') return;
+      item.dataset.boundMeal = 'true';
+      item.addEventListener('click', () => openMealEditor(item, item.dataset.newMealType || ''));
+    }
+    function getSpeechRecognition() {
+      const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!Recognition) return null;
+      const recognition = new Recognition();
+      recognition.lang = 'zh-CN';
+      recognition.continuous = true;
+      recognition.interimResults = true;
+      recognition.maxAlternatives = 1;
+      return recognition;
+    }
+    function setSpeechStatus(text, listening = false) {
+      const button = $('#voiceButton');
+      $('#voiceStatus').textContent = text;
+      button.classList.toggle('listening', listening);
+      button.setAttribute('aria-label', listening ? '停止语音输入' : '开始语音输入');
+    }
+    function renderSpeechText() {
+      const spokenText = `${speechFinalText}${speechInterimText}`.trim();
+      $('#summaryText').value = [speechBaseText, spokenText].filter(Boolean).join(speechBaseText && spokenText ? '\n' : '');
+    }
+    function stopSpeechRecognition(announce = true) {
+      if (!speechRecognition || !speechIsListening) return;
+      speechIsListening = false;
+      speechRecognition.stop();
+      speechInterimText = '';
+      renderSpeechText();
+      setSpeechStatus(speechFinalText.trim() ? '已转写，可以编辑' : '没有听清，可以再试一次');
+      if (speechFinalText.trim() && announce) showToast('已完成语音转写，请确认文字');
+    }
+    function startSpeechRecognition() {
+      speechRecognition = getSpeechRecognition();
+      if (!speechRecognition) {
+        setSpeechStatus('当前浏览器不支持语音识别');
+        showToast('请使用支持语音识别的浏览器，或直接输入文字');
+        return;
+      }
+      speechBaseText = $('#summaryText').value.trim();
+      speechFinalText = '';
+      speechInterimText = '';
+      renderSpeechText();
+      speechIsListening = true;
+      setSpeechStatus('正在听你说…', true);
+      speechRecognition.onresult = event => {
+        speechInterimText = '';
+        for (let index = event.resultIndex; index < event.results.length; index += 1) {
+          const transcript = event.results[index][0]?.transcript || '';
+          if (event.results[index].isFinal) speechFinalText += transcript;
+          else speechInterimText += transcript;
+        }
+        renderSpeechText();
+      };
+      speechRecognition.onerror = event => {
+        speechIsListening = false;
+        speechInterimText = '';
+        renderSpeechText();
+        const message = event.error === 'not-allowed' ? '没有麦克风权限，请在浏览器设置中允许' : event.error === 'no-speech' ? '没有听到声音，可以再试一次' : '语音识别暂时失败，可以直接输入';
+        setSpeechStatus(message);
+        showToast(message);
+      };
+      speechRecognition.onend = () => {
+        if (speechIsListening) {
+          speechIsListening = false;
+          setSpeechStatus(speechFinalText.trim() ? '已转写，可以编辑' : '没有听清，可以再试一次');
+        }
+      };
+      try { speechRecognition.start(); } catch (error) {
+        speechIsListening = false;
+        setSpeechStatus('语音启动失败，可以直接输入');
+        showToast('语音启动失败，请重试');
+      }
+    }
+    function iconForCategory(category) {
+      return ({ '工作': 'briefcase-business', '通勤': 'train-front', '身体': 'dumbbell', '成长': 'book-open', '生活': 'house', '自我照顾': 'heart-pulse', '休闲': 'shopping-bag', '娱乐': 'smartphone', '婚礼准备': 'heart-handshake' })[category] || 'circle-dot';
+    }
+    function colorForCategory(category) {
+      return ({ '工作': 'var(--coral)', '通勤': 'var(--blue)', '身体': 'var(--coral)', '成长': 'var(--blue)', '生活': 'var(--sage-dark)', '自我照顾': 'var(--yellow)', '休闲': 'var(--yellow)', '娱乐': 'var(--blue)', '婚礼准备': 'var(--yellow)' })[category] || 'var(--sage-dark)';
+    }
+    function bindPlanItem(item) {
+      if (item.dataset.boundPlan === 'true') return;
+      item.dataset.boundPlan = 'true';
+      item.addEventListener('click', () => openPlanEditor(item));
+      const check = $('.plan-check', item);
+      if (check) {
+        check.addEventListener('click', event => event.stopPropagation());
+        check.addEventListener('change', () => setPlanDone(item, check.checked));
+      }
+      if (item.dataset.planDone === 'true' && check) { check.checked = true; setPlanDone(item, true, false); }
+    }
+    function setPlanDone(item, done, announce = true) {
+      item.dataset.planDone = done ? 'true' : 'false';
+      item.classList.toggle('is-done', done);
+      const check = $('.plan-check', item);
+      if (check) check.checked = done;
+      const status = $('.plan-status', item);
+      if (status) status.textContent = done ? '已完成' : '';
+      syncTodayPlanSnapshot();
+      refreshSavedRecordViews();
+      if (announce) showToast(done ? `已完成「${item.dataset.planName}」` : `已取消完成「${item.dataset.planName}」`);
+    }
+    function openPlanEditor(item = null, presetName = '', presetCategory = '') {
+      editingPlan = item;
+      $('#planModalTitle').textContent = item ? '编辑今日计划' : '添加今日计划';
+      $('#planNameInput').value = item ? item.dataset.planName : presetName;
+      $('#planCategoryInput').value = item ? item.dataset.planCategory : (presetCategory || '生活');
+      $('#planTimeInput').value = item ? item.dataset.planTime : '';
+      $('#planDurationInput').value = item ? item.dataset.planDuration : '30 分钟';
+      openModal('planModal');
+    }
+    function activateReviewTab(view) {
+      const tab = $(`.review-tab[data-review-view="${view}"]`);
+      if (!tab) return;
+      $$('.review-tab').forEach(button => { const active = button === tab; button.classList.toggle('active', active); button.setAttribute('aria-selected', active); });
+      $$('.review-panel').forEach(panel => panel.classList.toggle('active', panel.id === `review-${view}`));
+      if (view === 'month') renderMonthReview();
+    }
+    function openWeeklyProgress(target) {
+      if (target === 'reading') {
+        activateView('review');
+        activateReviewTab('week');
+        showToast('已打开周复盘，查看成长投入');
+        return;
+      }
+      activateView('plan');
+      showToast(target === 'wedding' ? '已打开今日计划，查看婚礼事项' : '已打开今日计划，查看训练安排');
+    }
+    function calendarWeekDates() {
+      const anchor = new Date();
+      anchor.setDate(anchor.getDate() + calendarWeekOffset * 7);
+      const day = anchor.getDay();
+      const monday = new Date(anchor);
+      monday.setDate(anchor.getDate() + (day === 0 ? -6 : 1 - day));
+      return Array.from({ length: 7 }, (_, index) => {
+        const date = new Date(monday);
+        date.setDate(monday.getDate() + index);
+        return date;
+      });
+    }
+    function calendarRangeLabel(week) {
+      const first = week[0]; const last = week[6];
+      const firstLabel = `${first.getMonth() + 1} 月 ${first.getDate()} 日`;
+      const lastLabel = `${last.getMonth() + 1} 月 ${last.getDate()} 日`;
+      return `${firstLabel} - ${lastLabel}`;
+    }
+    function calendarPlanItemsForDate(date) {
+      if (dateKey(date) !== dateKey()) return [];
+      return $$('#planList .plan-item').map(item => ({
+        type: item.dataset.planDone === 'true' ? 'done' : 'plan',
+        name: item.dataset.planName || $('.plan-copy strong', item)?.textContent || '未命名计划',
+        time: item.dataset.planTime || '待安排',
+        detail: item.dataset.planDuration || '',
+        category: item.dataset.planCategory || ''
+      }));
+    }
+    function calendarItemsForDate(date) {
+      const summary = buildDaySummary(date);
+      const activities = summary.activities.map(activity => ({
+        type: 'done',
+        name: activity.name || '未命名活动',
+        time: activity.start || '--:--',
+        detail: formatMinutes(activity.durationMinutes || durationBetweenTimes(activity.start, activity.end)),
+        category: normalizeHistoryCategory(activity.category, activity.name)
+      }));
+      return activities.concat(calendarPlanItemsForDate(date));
+    }
+    function calendarDateLabel(date) {
+      const key = dateKey(date);
+      if (key === dateKey()) return '今天';
+      const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate() + 1);
+      if (key === dateKey(tomorrow)) return '明天';
+      return weekdayLabel(date);
+    }
+    function openCalendarDate(date) {
+      selectedReviewDate = date;
+      activateView('review');
+      activateReviewTab('day');
+    }
+    function renderCalendar() {
+      const grid = $('#calendarGrid'); const list = $('#calendarList');
+      if (!grid || !list) return;
+      const week = calendarWeekDates();
+      $('#calendarRange').textContent = calendarRangeLabel(week);
+      grid.innerHTML = week.map(date => {
+        const items = calendarItemsForDate(date);
+        const visibleItems = items.slice(0, 3);
+        const dots = visibleItems.length ? visibleItems.map(item => `<span class="calendar-dot ${item.type === 'done' ? 'done' : 'future'}">${escapeHtml(item.name)}</span>`).join('') : '<span class="calendar-dot empty">暂无记录</span>';
+        const extra = items.length > visibleItems.length ? `<span class="calendar-dot empty">+${items.length - visibleItems.length} 项</span>` : '';
+        const label = `${calendarDateLabel(date)} ${date.getMonth() + 1} 月 ${date.getDate()} 日${items.length ? `，${items.map(item => item.name).join('、')}` : '，暂无记录'}`;
+        return `<button class="calendar-day${dateKey(date) === dateKey() ? ' today' : ''}" type="button" data-calendar-date="${dateKey(date)}" aria-label="${escapeHtml(label)}"><span class="day-name">${weekdayLabel(date).replace('周', '')}</span><span class="day-number">${date.getDate()}</span>${dots}${extra}</button>`;
+      }).join('');
+      const listItems = week.flatMap(date => calendarItemsForDate(date).map(item => ({ ...item, date }))).sort((a, b) => `${dateKey(a.date)} ${a.time}`.localeCompare(`${dateKey(b.date)} ${b.time}`)).slice(0, 8);
+      list.innerHTML = listItems.length ? listItems.map(item => `<button class="calendar-list-item" type="button" data-calendar-date="${dateKey(item.date)}"><div class="calendar-list-date">${calendarDateLabel(item.date)}<br>${escapeHtml(item.time)}</div><div class="calendar-list-copy"><strong>${escapeHtml(item.name)}</strong><p>${item.type === 'done' ? `已记录 · ${escapeHtml(item.detail)}` : `待完成计划${item.detail ? ` · ${escapeHtml(item.detail)}` : ''}`}</p></div><i data-lucide="chevron-right" style="color:var(--muted)"></i></button>`).join('') : '<div class="history-empty">这周还没有时间记录或计划。</div>';
+      $$('[data-calendar-date]').forEach(item => item.addEventListener('click', () => openCalendarDate(item.dataset.calendarDate)));
+      lucide.createIcons({ attrs: { width: 16, height: 16, 'stroke-width': 1.8 } });
+    }
+    function activateView(name) {
+      $$('.view').forEach(view => view.classList.toggle('active', view.id === `view-${name}`));
+      $$('.nav-item').forEach(item => item.classList.toggle('active', item.dataset.view === name));
+      if (name === 'today') selectedReviewDate = dateKey();
+      if (name === 'review') { renderHistoryDate(); renderWeekReview(); renderMonthReview(); }
+      if (name === 'calendar') renderCalendar();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    function formatDuration(seconds) {
+      const h = Math.floor(seconds / 3600); const m = Math.floor((seconds % 3600) / 60); const s = seconds % 60;
+      return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    }
+    function elapsedFrom(start) { return Math.max(0, Math.floor((Date.now() - new Date(start).getTime()) / 1000)); }
+
+    function updateTimers() {
+      $$('.active-card').forEach(card => {
+        const start = card.dataset.start;
+        if (start) $('.live-timer', card).textContent = formatDuration(elapsedFrom(start));
+      });
+    }
+    setInterval(updateTimers, 1000); updateTimers();
+    $$('#mustDoList .must-check').forEach(check => check.addEventListener('change', updateMustDoCount));
+    $$('#planList .plan-item').forEach(bindPlanItem);
+    $$('.meal-editable').forEach(bindMealItem);
+
+    $$('.nav-item').forEach(item => item.addEventListener('click', () => activateView(item.dataset.view)));
+    $('#jumpReview').addEventListener('click', () => activateView('review'));
+    $('#reviewPrevDay').addEventListener('click', () => shiftReviewDate(-1));
+    $('#reviewNextDay').addEventListener('click', () => shiftReviewDate(1));
+    $('#reviewDateInput').addEventListener('change', event => { selectedReviewDate = event.target.value || dateKey(); renderHistoryDate(); renderWeekReview(); });
+    $('#weekReviewPrev').addEventListener('click', () => { const date = new Date(`${selectedReviewDate}T00:00:00`); date.setDate(date.getDate() - 7); selectedReviewDate = dateKey(date); renderWeekReview(); });
+    $('#weekReviewNext').addEventListener('click', () => { const date = new Date(`${selectedReviewDate}T00:00:00`); date.setDate(date.getDate() + 7); selectedReviewDate = dateKey(date); renderWeekReview(); });
+    $$('.skin-dimension input[type="number"]').forEach(input => input.addEventListener('input', () => { const value = Math.max(0, Math.min(100, Number(input.value) || 0)); input.value = value; const score = $(`#${input.id}Score`); if (score) score.textContent = value; renderSkinRadar(skinDimensions.map(item => Number($(item.input).value) || 0)); }));
+    $('#saveSkinCheck').addEventListener('click', () => { const values = Object.fromEntries(skinDimensions.map(item => [item.key, Number($(item.input).value)])); saveSkinCheck(selectedReviewDate, values); renderWeekReview(); showToast('今日皮肤状态已保存'); });
+    $('#monthReviewPrev').addEventListener('click', () => { monthReviewOffset -= 1; renderMonthReview(); });
+    $('#monthReviewNext').addEventListener('click', () => { monthReviewOffset += 1; renderMonthReview(); });
+    $('#saveDayReview').addEventListener('click', () => { const review = saveReview('day', selectedReviewDate, { wins: $('#dayReviewWins').value.trim(), strength: $('#dayReviewStrength').value.trim(), improve: $('#dayReviewImprove').value.trim(), stuck: $('#dayReviewImprove').value.trim(), next: $('#dayReviewNext').value.trim() }); $('#dayReviewSaveState').textContent = `已保存 ${new Date(review.updatedAt).toLocaleDateString('zh-CN', { month: 'numeric', day: 'numeric' })}`; renderReviewTrace(weekDatesForAnchor(selectedReviewDate), '#weekDayTrace'); renderMonthReview(); showToast('今日行动复盘已保存'); });
+    $('#saveWeekReview').addEventListener('click', () => { const period = weekReviewPeriod(selectedReviewDate); const previous = loadReview('week', period); const review = saveReview('week', period, { observeWins: $('#weekObserveWins').value.trim(), observeStuck: $('#weekObserveStuck').value.trim(), observeBody: $('#weekObserveBody').value.trim(), observeMoney: $('#weekObserveMoney').value.trim(), observeMood: $('#weekObserveMood').value.trim(), observeSelf: $('#weekObserveSelf').value.trim(), actions: previous.actions || [] }); $('#weekReviewSaveState').textContent = `已保存 ${new Date(review.updatedAt).toLocaleDateString('zh-CN', { month: 'numeric', day: 'numeric' })}`; renderReviewTrace(weekDatesForAnchor(selectedReviewDate), '#weekDayTrace'); renderMonthReview(); showToast('本周复盘已保存'); });
+    $('#addWeekAction').addEventListener('click', () => { const input = $('#weekActionInput'); const text = input.value.trim(); if (!text) { showToast('先写下一个下周待办'); return; } const period = weekReviewPeriod(selectedReviewDate); const review = loadReview('week', period); review.actions.push({ id: `week-action-${Date.now()}`, text, date: $('#weekActionDate').value, priority: $('#weekActionPriority').value, done: false }); saveReview('week', period, review); input.value = ''; renderWeekActions(review.actions); showToast('已加入下周待办'); });
+    $('#saveMonthReview').addEventListener('click', () => { const period = monthReviewPeriod(monthReviewDate()); const actionsByArea = Object.fromEntries($$('#monthActionGrid [data-month-action]').map(field => [field.dataset.monthAction, field.value.trim()])); const review = saveReview('month', period, { wins: $('#monthReviewWins').value.trim(), pattern: $('#monthReviewPattern').value.trim(), adjust: $('#monthReviewAdjust').value.trim(), memo: $('#monthReviewMemo').value.trim(), actionsByArea }); renderMonthReview(); showToast('本月复盘已保存'); });
+    $('#weekCategoryList').addEventListener('click', event => { const button = event.target.closest('[data-week-filter]'); if (!button) return; weekCategoryFilter = button.dataset.weekFilter; renderWeekReview(); });
+    $('#openStart').addEventListener('click', () => openModal('startModal'));
+    $('#fabStart').addEventListener('click', () => openModal('startModal'));
+    $('#openManual').addEventListener('click', () => openModal('manualModal'));
+    $('#openManualTop').addEventListener('click', () => openModal('manualModal'));
+    $('#openSummary').addEventListener('click', openDailyFeelingEditor);
+    $('#editFeeling').addEventListener('click', openDailyFeelingEditor);
+    $('#openMeal').addEventListener('click', () => openMealEditor());
+    $('#nextRecipeSet').addEventListener('click', () => { recipeSetIndex = (recipeSetIndex + 1) % recipeSets.length; renderRecipeSet(); showToast('已换一批晚餐菜谱'); });
+    $('#openSettings').addEventListener('click', () => activateView('me'));
+    $('#locationButton').addEventListener('click', refreshLocationWeather);
+    $('#editProfile').addEventListener('click', () => {
+      const currentName = $('#me-title').textContent;
+      $('#profileName').value = currentName === '我的资料' ? '' : currentName;
+      $('#profileTaglineInput').value = $('#profileTagline').textContent;
+      $('#profileAvatarFile').value = '';
+      pendingProfileAvatar = null;
+      $('#profileAvatarHint').textContent = savedProfileAvatar ? '当前已设置头像；选择新图片可替换' : '不上传时显示默认头像';
+      openModal('profileModal');
+    });
+    $('#addGoal').addEventListener('click', () => openGoalEditor());
+    $('#addGoalEmpty').addEventListener('click', () => openGoalEditor());
+    $('#settingsReminders').addEventListener('click', () => { $('#settingsModalTitle').textContent = '提醒与低打扰模式'; openModal('settingsModal'); });
+    $('#settingsPrivacy').addEventListener('click', () => { $('#settingsModalTitle').textContent = '隐私与 AI 设置'; openModal('settingsModal'); });
+    $('#settingsExport').addEventListener('click', () => { $('#settingsModalTitle').textContent = '导出我的记录'; openModal('settingsModal'); });
+    $('#clearLocalData').addEventListener('click', () => { if (!window.confirm('确定清空这个 App 的全部本地数据吗？时间记录、复盘、皮肤、目标和设置都将删除，且无法恢复。')) return; localStorage.clear(); showToast('本地数据已清空'); setTimeout(() => window.location.reload(), 450); });
+    $('#editPlan').addEventListener('click', () => openModal('themeModal'));
+    $('#editTheme').addEventListener('click', () => openModal('themeModal'));
+    $('#saveTheme').addEventListener('click', () => { applyTheme(); refreshSavedRecordViews(); closeModals(); showToast('今天的主题和必做事项已更新'); });
+    $('#themeSelect').addEventListener('change', () => { $('#customThemeFields').hidden = $('#themeSelect').value !== '__custom__'; });
+    $('#openCalendar').addEventListener('click', () => activateView('calendar'));
+    $('#openCalendarFromReview').addEventListener('click', () => activateView('calendar'));
+    $$('[data-progress-target]').forEach(button => button.addEventListener('click', () => openWeeklyProgress(button.dataset.progressTarget)));
+    $('#addCalendarPlan').addEventListener('click', () => openPlanEditor());
+    $('#calendarPrev').addEventListener('click', () => { calendarWeekOffset -= 1; renderCalendar(); showToast('已查看上一周'); });
+    $('#calendarNext').addEventListener('click', () => { calendarWeekOffset += 1; renderCalendar(); showToast('已查看下一周'); });
+    $$('.review-tab').forEach(tab => tab.addEventListener('click', () => activateReviewTab(tab.dataset.reviewView)));
+    $$('.close-modal').forEach(button => button.addEventListener('click', closeModals));
+    $$('.modal-layer').forEach(layer => layer.addEventListener('click', event => { if (event.target === layer) closeModals(); }));
+
+    $$('.activity-option').forEach(option => option.addEventListener('click', () => {
+      const name = option.dataset.startActivity;
+      const now = new Date();
+      const iconMap = { '通勤': 'train-front', '上班': 'briefcase-business', '阅读': 'book-open', '健身': 'dumbbell', '做饭': 'cooking-pot', '玩手机': 'smartphone', '打球': 'circle-dot', '瑜伽': 'stretch-horizontal', '体态练习': 'accessibility', '学习': 'graduation-cap', '练字': 'square-pen', '买菜': 'shopping-basket', '逛街': 'shopping-bag', '按摩放松': 'heart-pulse', '其他': 'more-horizontal' };
+      const card = document.createElement('article'); card.className = 'active-card compact'; card.dataset.activity = name; card.dataset.category = activityCategory(name); card.dataset.start = now.toISOString();
+      card.innerHTML = `<div class="active-main"><div class="active-icon"><i data-lucide="${iconMap[name] || 'circle'}"></i></div><div><h3>${name}</h3><p>刚刚开始 · 可与其他活动重叠</p></div></div><div><span class="timer live-timer">00:00:00</span><button class="stop-button stop-activity">结束</button></div>`;
+      $('.active-empty', $('#activeStack'))?.remove(); $('#activeStack').prepend(card); lucide.createIcons({ attrs: { width: 16, height: 16, 'stroke-width': 1.8 } }); bindStop(card); closeModals(); showToast(`已开始记录「${name}」`);
+    }));
+
+    function bindStop(card) {
+      $('.stop-activity', card).addEventListener('click', () => {
+        const name = card.dataset.activity; const duration = elapsedFrom(card.dataset.start); const startedAt = new Date(card.dataset.start); const endedAt = new Date();
+        const toTime = value => `${String(value.getHours()).padStart(2, '0')}:${String(value.getMinutes()).padStart(2, '0')}`;
+        addActivityRecord({ name, category: card.dataset.category || activityCategory(name), start: toTime(startedAt), end: toTime(endedAt), durationMinutes: Math.max(1, Math.floor(duration / 60)) });
+        card.remove();
+        showToast(`已结束「${name}」 · 这段时间被好好记下了`);
+      });
+    }
+    $$('.active-card').forEach(bindStop);
+
+    $('#saveManual').addEventListener('click', () => {
+      const name = $('#manualActivity').value.trim() || '未命名活动'; const start = $('#manualStart').value; const end = $('#manualEnd').value; const category = $('#manualCategory').value; const note = $('#manualNote').value.trim();
+      if (!start || !end || end <= start) { showToast('请检查开始和结束时间'); return; }
+      addActivityRecord({ name, category, start, end, durationMinutes: durationBetweenTimes(start, end), note }); $('#manualNote').value = ''; closeModals(); showToast(`已补录「${name}」 ${start} - ${end}`);
+    });
+
+    $('#voiceButton').addEventListener('click', () => {
+      if (speechIsListening) stopSpeechRecognition();
+      else startSpeechRecognition();
+    });
+    $('#saveFeeling').addEventListener('click', () => { saveDailyFeeling(); });
+    $('#generateAi').addEventListener('click', () => { if (!saveDailyFeeling(false)) return; $('#aiOutput').classList.add('show'); $('#generateAi').innerHTML = '<i data-lucide="check" style="width:14px;height:14px"></i>已保存并生成'; lucide.createIcons({ attrs: { width: 16, height: 16, 'stroke-width': 1.8 } }); showToast('感受已保存，复盘已整理好'); });
+    $('#planTomorrow').addEventListener('click', () => { activateView('plan'); showToast('已加入明日计划：确认婚礼场地方案'); });
+    $('#editReview').addEventListener('click', openDailyFeelingEditor);
+    $('#saveMeal').addEventListener('click', () => {
+      const type = $('#mealType').value; const content = $('#mealContent').value.trim(); const feel = $('#mealFeel').value;
+      if (!content) { showToast('先写下今天吃了什么'); return; }
+      const record = loadDayRecord(); const mealId = editingMeal?.dataset.mealId || `meal-${Date.now()}`; const matchingIndexes = record.meals.map((item, index) => item.type === type ? index : -1).filter(index => index >= 0); const existingMeal = editingMeal?.dataset.mealId ? record.meals.findIndex(item => item.id === mealId) : (matchingIndexes.length ? matchingIndexes[matchingIndexes.length - 1] : -1); const meal = { id: existingMeal >= 0 ? record.meals[existingMeal].id : mealId, type, content, feel, time: type === '早餐' ? '07:25' : type === '午餐' ? '12:20' : type === '晚餐' ? '19:30' : '今天' };
+      if (existingMeal >= 0) record.meals[existingMeal] = meal; else record.meals.push(meal); record.meals = record.meals.reduce((unique, item) => { const index = unique.findIndex(existing => existing.type === item.type); if (index >= 0) unique[index] = item; else unique.push(item); return unique; }, []); saveDayRecord(dateKey(), record);
+      if (editingMeal && editingMeal.dataset.mealContent) {
+        editingMeal.dataset.mealId = mealId;
+        editingMeal.dataset.mealType = type; editingMeal.dataset.mealContent = content; editingMeal.dataset.mealFeel = feel;
+        const time = type === '午餐' ? '12:20' : type === '早餐' ? '07:25' : '今天';
+        $('.meal-copy strong', editingMeal).textContent = `${type} · ${content}`;
+        $('.meal-copy p', editingMeal).textContent = `${time} · ${feel} · 已更新`;
+        showToast(`${type}已更新`);
+      } else {
+        showToast(`已记录${type}：${content}`);
+      }
+      editingMeal = null;
+      renderMealGrid();
+      refreshSavedRecordViews();
+      closeModals(); $('#mealContent').value = '';
+    });
+    $('#saveGoals').addEventListener('click', () => {
+      const name = $('#goalNameInput').value.trim();
+      const why = $('#goalWhyInput').value.trim();
+      const deadline = $('#goalDeadlineInput').value;
+      const actions = $('#goalActionsInput').value.split(/[、,，]/).map(item => item.trim()).filter(Boolean).slice(0, 8);
+      if (!name) { showToast('先写下你想实现的结果'); return; }
+      if (editingGoal) Object.assign(editingGoal, { name, why, deadline, actions });
+      else goals.push({ id: `goal-${Date.now()}`, name, why, deadline, actions, icon: 'sparkles' });
+      saveGoalsToStorage(); renderGoals(); editingGoal = null; closeModals(); showToast('目标已保存');
+    });
+    $('#saveSettings').addEventListener('click', () => { try { localStorage.setItem('shiguang.settings', JSON.stringify({ reminderMode: $('#reminderMode').value, aiPrivacy: $('#aiPrivacy').value, exportFormat: $('#exportFormat').value })); } catch (error) { /* current session remains usable */ } closeModals(); showToast('设置已保存'); });
+    $('#profileAvatarFile').addEventListener('change', event => {
+      const file = event.target.files?.[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        pendingProfileAvatar = reader.result;
+        $('#profileAvatarHint').textContent = `已选择：${file.name}，保存资料后生效`;
+      };
+      reader.readAsDataURL(file);
+    });
+    $('#saveProfile').addEventListener('click', () => {
+      const name = $('#profileName').value.trim();
+      const tagline = $('#profileTaglineInput').value.trim() || '与重要的事，一起慢慢靠近';
+      $('#me-title').textContent = name || '我的资料';
+      if (pendingProfileAvatar) savedProfileAvatar = pendingProfileAvatar;
+      const avatar = $('#profileAvatar');
+      avatar.style.backgroundImage = savedProfileAvatar ? `url("${savedProfileAvatar}")` : '';
+      avatar.classList.toggle('has-image', Boolean(savedProfileAvatar));
+      avatar.setAttribute('aria-label', savedProfileAvatar ? '已设置头像' : '默认头像');
+      $('#profileTagline').textContent = tagline;
+      try { localStorage.setItem('shiguang.profile', JSON.stringify({ name: name || '', tagline, avatar: savedProfileAvatar })); } catch (error) { /* current session remains usable */ }
+      closeModals(); showToast('资料已保存');
+    });
+    loadGoals();
+    renderGoals();
+    loadTheme();
+    loadProfile();
+    loadSettings();
+    renderDateLabels();
+    selectedReviewDate = dateKey();
+    syncTodayPlanSnapshot();
+    renderTodaySummary();
+    renderHistoryDate();
+    renderWeekReview();
+    renderMonthReview();
+    renderRecipeSet();
+    $('#addPlan').addEventListener('click', () => openPlanEditor());
+    $('#savePlan').addEventListener('click', () => {
+      const name = $('#planNameInput').value.trim();
+      const category = $('#planCategoryInput').value;
+      const time = $('#planTimeInput').value;
+      const duration = $('#planDurationInput').value;
+      if (!name) { showToast('先写下要做的事'); return; }
+      if (editingPlan) {
+        const done = editingPlan.dataset.planDone === 'true';
+        editingPlan.dataset.planName = name; editingPlan.dataset.planCategory = category; editingPlan.dataset.planTime = time; editingPlan.dataset.planDuration = duration;
+        editingPlan.innerHTML = `<input class="plan-check" type="checkbox" aria-label="完成${name}"><i data-lucide="${iconForCategory(category)}" style="color:${colorForCategory(category)}"></i><span class="plan-copy"><strong>${name}</strong><small>${category} · ${duration}</small><span class="plan-status"></span></span><span class="time">${time || '待安排'}</span>`;
+        lucide.createIcons({ attrs: { width: 16, height: 16, 'stroke-width': 1.8 } }); editingPlan.dataset.boundPlan = ''; bindPlanItem(editingPlan); setPlanDone(editingPlan, done, false); showToast(`已更新「${name}」`);
+      } else {
+        const row = document.createElement('article'); row.className = 'plan-item'; row.dataset.planName = name; row.dataset.planCategory = category; row.dataset.planTime = time; row.dataset.planDuration = duration;
+        row.innerHTML = `<input class="plan-check" type="checkbox" aria-label="完成${name}"><i data-lucide="${iconForCategory(category)}" style="color:${colorForCategory(category)}"></i><span class="plan-copy"><strong>${name}</strong><small>${category} · ${duration}</small><span class="plan-status"></span></span><span class="time">${time || '待安排'}</span>`;
+        $('#planList').appendChild(row); lucide.createIcons({ attrs: { width: 16, height: 16, 'stroke-width': 1.8 } }); bindPlanItem(row);
+        showToast(`已添加「${name}」`);
+      }
+      editingPlan = null; syncTodayPlanSnapshot(); renderTodaySummary(); if (selectedReviewDate === dateKey()) renderHistoryDate(); closeModals();
+    });
+    dailyFeeling = loadDailyFeeling(selectedReviewDate);
+    renderDailyFeeling(selectedReviewDate);
+    refreshLocationWeather();
+    if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+  </script>
+</body>
+</html>
