@@ -34,19 +34,21 @@ docker run -d --name time-record --restart unless-stopped -p 8080:80 ghcr.io/bea
 
 ### 使用自动部署脚本
 
-将仓库中的 `deploy.sh` 下载到服务器并执行：
+将仓库中的 `deploy.sh` 和 `compose.yaml` 下载到服务器同一个目录并执行：
 
 ```bash
 chmod +x deploy.sh
 ./deploy.sh
 ```
 
-脚本可以重复执行，用于首次部署或更新服务。默认参数如下：
+脚本参考 `love-backend` 的部署方式，包含并发锁、镜像拉取、Compose 更新和健康检查，可以重复执行，用于首次部署或更新服务。默认参数如下：
 
 ```bash
 IMAGE=ghcr.io/beatuy-rachel/time IMAGE_TAG=latest \
-CONTAINER_NAME=time-record HOST_PORT=8080 ./deploy.sh
+HOST_PORT=8080 ./deploy.sh
 ```
+
+脚本实际使用 Compose，端口和镜像参数通过环境变量传给 `compose.yaml`。推荐按需设置 `HOST_PORT` 和 `IMAGE_TAG`。
 
 如果 GHCR 镜像是私有的，先设置登录信息再执行，Token 只通过标准输入交给 Docker，不会写入脚本：
 
