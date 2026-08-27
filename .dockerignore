@@ -1,0 +1,7 @@
+.git
+.github
+docs
+*.png
+*.jpg
+*.jpeg
+*.log
