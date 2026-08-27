@@ -31,3 +31,27 @@ docker run -d --name time-record --restart unless-stopped -p 8080:80 ghcr.io/bea
 ```
 
 然后访问服务器的 `8080` 端口。若镜像设置为公开，服务器拉取时不需要登录；若设置为私有，需要使用具有 `read:packages` 权限的 GitHub Token 登录。
+
+### 使用自动部署脚本
+
+将仓库中的 `deploy.sh` 下载到服务器并执行：
+
+```bash
+chmod +x deploy.sh
+./deploy.sh
+```
+
+脚本可以重复执行，用于首次部署或更新服务。默认参数如下：
+
+```bash
+IMAGE=ghcr.io/beatuy-rachel/time IMAGE_TAG=latest \
+CONTAINER_NAME=time-record HOST_PORT=8080 ./deploy.sh
+```
+
+如果 GHCR 镜像是私有的，先设置登录信息再执行，Token 只通过标准输入交给 Docker，不会写入脚本：
+
+```bash
+export GHCR_USERNAME=Beatuy-Rachel
+export GHCR_TOKEN='具有 read:packages 权限的 Token'
+./deploy.sh
+```
