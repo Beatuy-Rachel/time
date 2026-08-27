@@ -37,6 +37,8 @@ docker run -d --name time-record --restart unless-stopped -p 8080:80 ghcr.io/bea
 将仓库中的 `deploy.sh` 和 `compose.yaml` 下载到服务器同一个目录并执行：
 
 ```bash
+cp .env.example .env
+# 按需修改 .env 中的端口、镜像标签等配置
 chmod +x deploy.sh
 ./deploy.sh
 ```
@@ -50,7 +52,7 @@ HOST_PORT=8080 ./deploy.sh
 
 脚本实际使用 Compose，端口和镜像参数通过环境变量传给 `compose.yaml`。推荐按需设置 `HOST_PORT` 和 `IMAGE_TAG`。
 
-如果 GHCR 镜像是私有的，先设置登录信息再执行，Token 只通过标准输入交给 Docker，不会写入脚本：
+脚本会自动读取同目录下的 `.env`。如果 GHCR 镜像是私有的，可以将登录信息写入服务器上的 `.env`，Token 只通过标准输入交给 Docker，不会写入脚本：
 
 ```bash
 export GHCR_USERNAME=Beatuy-Rachel

@@ -6,6 +6,13 @@ SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 LOCK_DIR=${DEPLOY_LOCK_DIR:-/tmp/time-record-deploy.lock}
 WAIT_TIMEOUT=${DEPLOY_WAIT_TIMEOUT:-120}
 
+if [ -f "$SCRIPT_DIR/.env" ]; then
+    set -a
+    # shellcheck disable=SC1091
+    . "$SCRIPT_DIR/.env"
+    set +a
+fi
+
 log() {
     printf '[%s] %s\n' "$(date '+%Y-%m-%d %H:%M:%S')" "$*"
 }
