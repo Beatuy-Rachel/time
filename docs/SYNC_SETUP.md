@@ -1,15 +1,19 @@
 # 跨设备同步方案
 
-当前原型的数据保存在浏览器 `localStorage`，适合单设备试用，但不会自动同步到手机、平板或其他浏览器。
+应用现在内置轻量账号和同步服务。未登录时数据仍保存在浏览器 `localStorage`；登录后，时间、饮食、复盘、皮肤、计划和设置会保存到服务器账号，在手机、平板和电脑之间同步。
 
-推荐使用 Supabase：
+## 部署同步服务
 
-1. 创建 Supabase 项目并启用邮箱登录。
-2. 建立 `user_data` 表：`user_id uuid primary key`、`payload jsonb not null`、`updated_at timestamptz not null`。
-3. 开启 RLS，只允许用户读写 `user_id = auth.uid()` 的数据。
-4. 将项目 URL、匿名 key 和登录入口接入应用的同步层。
+在服务器上准备 `.env`，至少设置一个随机长密钥：
 
-真正接入前还需要确定登录方式和冲突策略。建议默认使用“最后一次更新时间较新的设备覆盖旧版本”，并保留手动导出 JSON 作为备份。
+```bash
+cp .env.example .env
+openssl rand -hex 32
+```
+
+将生成的值填入 `AUTH_SECRET`，然后执行 `./deploy.sh`。默认通过服务器的 `8080` 端口访问，账号数据保存在服务器同目录的 `./data`，升级镜像不会丢失。请给站点配置 HTTPS，不要在公网 HTTP 下输入密码。
+
+首次登录的设备会把本地数据上传到新账号；已有云端数据时，登录设备恢复云端数据。之后保存记录会自动同步，离线时继续使用本地数据。
 
 ## 使用 GitHub Actions 构建镜像
 

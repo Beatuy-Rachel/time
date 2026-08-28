@@ -615,6 +615,13 @@
     .meal-quick-option { border: 1px solid var(--line); border-radius: 15px; background: var(--surface); color: var(--ink); padding: 6px 10px; font-size: 11px; cursor: pointer; }
     .meal-quick-option:hover, .meal-quick-option.is-selected { border-color: var(--sage); background: var(--sage-pale); color: var(--sage-dark); }
     .form-hint { display: block; color: var(--muted); font-size: 10px; line-height: 1.5; }
+    .account-row { display: flex; align-items: center; gap: 10px; padding: 12px; background: var(--sage-pale); border: 1px solid var(--line); border-radius: 8px; }
+    .account-row-copy { flex: 1; min-width: 0; }
+    .account-row strong, .account-row small { display: block; }
+    .account-row strong { font-size: 12px; font-weight: 500; }
+    .account-row small { color: var(--muted); font-size: 10px; margin-top: 3px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .account-action { border: 1px solid var(--sage); border-radius: 6px; background: var(--surface); color: var(--sage-dark); padding: 7px 9px; font-size: 11px; white-space: nowrap; }
+    .account-action.danger { color: var(--coral); border-color: #e5bdb3; }
     .file-input { width: 100%; color: var(--muted); font-size: 11px; }
     .file-input::file-selector-button { border: 1px solid var(--line); border-radius: 7px; background: var(--surface); color: var(--ink); padding: 8px 10px; margin-right: 8px; cursor: pointer; }
     .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
@@ -816,6 +823,7 @@
       <section class="view" id="view-me" aria-labelledby="me-title">
         <p class="eyebrow">我的设置</p><div class="profile-head"><div class="avatar" id="profileAvatar" aria-label="默认头像"><i data-lucide="user-round"></i></div><div><h2 id="me-title">我的资料</h2><p id="profileTagline">与重要的事，一起慢慢靠近</p></div><button class="profile-edit" id="editProfile">编辑资料</button></div>
         <p class="settings-intro">这里集中管理你的目标、日计划、提醒、隐私和数据。点击每一项即可修改。</p>
+        <div class="account-row"><i data-lucide="cloud" style="color:var(--sage-dark)"></i><div class="account-row-copy"><strong id="accountStatus">未登录 · 仅保存在本设备</strong><small id="accountEmail">登录后可在手机、平板和电脑同步</small></div><button class="account-action" id="openAuth">登录 / 注册</button></div>
         <div class="section-title"><h2>想实现的事</h2><button class="text-button" id="addGoal">添加目标 +</button></div>
         <div class="goal-list" id="goalList"><div class="goal-empty" id="goalEmpty"><strong>先写下一个真正想要的结果</strong><p>例如：拍一组让自己喜欢的婚纱照。训练、减脂、体态和牙齿护理，都可以作为实现它的行动。</p><button class="primary-button" id="addGoalEmpty"><i data-lucide="plus" style="width:14px;height:14px"></i>添加我的第一个目标</button></div></div>
         <div class="section-title"><h2>设置入口</h2></div>
@@ -831,6 +839,10 @@
       <button class="nav-item" data-view="review"><i data-lucide="sparkles"></i><span>复盘</span></button>
       <button class="nav-item" data-view="me"><i data-lucide="user-round"></i><span>我的</span></button>
     </nav>
+  </div>
+
+  <div class="modal-layer" id="authModal" role="dialog" aria-modal="true" aria-labelledby="authTitle">
+    <div class="modal"><div class="modal-head"><h2 id="authTitle">登录拾光</h2><button class="close-button close-modal" aria-label="关闭"><i data-lucide="x"></i></button></div><div class="form-stack"><div class="form-field"><label for="authEmail">邮箱</label><input id="authEmail" type="email" autocomplete="email" placeholder="you@example.com"></div><div class="form-field"><label for="authPassword">密码</label><input id="authPassword" type="password" autocomplete="current-password" placeholder="至少 8 位"></div><span class="form-hint" id="authHint">登录后，数据会在已登录设备之间同步。</span></div><div class="modal-footer"><button class="soft-button" id="authSwitch">创建账号</button><button class="primary-button" id="authSubmit">登录</button></div></div>
   </div>
 
   <div class="modal-layer" id="startModal" role="dialog" aria-modal="true" aria-labelledby="startTitle">
@@ -905,7 +917,7 @@
       localStorage.setItem(marker, '1');
     }
     initializeFreshAppData();
-    const modalIds = ['startModal', 'manualModal', 'summaryModal', 'mealModal', 'themeModal', 'planModal', 'goalModal', 'settingsModal', 'profileModal'];
+    const modalIds = ['authModal', 'startModal', 'manualModal', 'summaryModal', 'mealModal', 'themeModal', 'planModal', 'goalModal', 'settingsModal', 'profileModal'];
     const activityStart = {};
     let toastTimer;
     let editingPlan = null;
@@ -925,6 +937,35 @@
     let weekCategoryFilter = 'all';
     let monthReviewOffset = 0;
     let recipeSetIndex = 0;
+    let authMode = 'login';
+    let authToken = localStorage.getItem('shiguang.authToken') || '';
+    let syncTimer;
+    const apiBase = `${location.protocol}//${location.host}`;
+    function localPayload() {
+      const data = {};
+      Object.keys(localStorage).filter(key => key.startsWith('shiguang.') && key !== 'shiguang.authToken').forEach(key => { data[key] = localStorage.getItem(key); });
+      return data;
+    }
+    function applyPayload(payload) {
+      Object.keys(localStorage).filter(key => key.startsWith('shiguang.') && key !== 'shiguang.authToken').forEach(key => localStorage.removeItem(key));
+      Object.entries(payload || {}).forEach(([key, value]) => { if (key.startsWith('shiguang.')) localStorage.setItem(key, value); });
+    }
+    async function syncData() {
+      if (!authToken) return;
+      clearTimeout(syncTimer);
+      syncTimer = setTimeout(async () => {
+        try { await fetch(`${apiBase}/api/sync`, { method: 'PUT', headers: { Authorization: `Bearer ${authToken}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ payload: localPayload() }) }); } catch (error) { /* offline changes remain local */ }
+      }, 500);
+    }
+    async function loadCloudData() {
+      if (!authToken) return false;
+      try { const response = await fetch(`${apiBase}/api/sync`, { headers: { Authorization: `Bearer ${authToken}` } }); if (!response.ok) throw new Error('auth'); const result = await response.json(); if (result.updatedAt) applyPayload(result.payload); return { ok: true, hasData: Boolean(result.updatedAt) }; } catch (error) { return { ok: false, hasData: false }; }
+    }
+    function renderAccount(user = null) { $('#accountStatus').textContent = user ? `已登录 · ${user.email}` : '未登录 · 仅保存在本设备'; $('#accountEmail').textContent = user ? '数据会自动同步到当前账号' : '登录后可在手机、平板和电脑同步'; $('#openAuth').textContent = user ? '退出登录' : '登录 / 注册'; $('#openAuth').classList.toggle('danger', Boolean(user)); }
+    async function openAuth() { if (authToken) { authToken = ''; localStorage.removeItem('shiguang.authToken'); renderAccount(); showToast('已退出登录，本设备仍可继续使用'); return; } $('#authTitle').textContent = '登录拾光'; $('#authSubmit').textContent = '登录'; openModal('authModal'); }
+    async function submitAuth() {
+      const email = $('#authEmail').value.trim(); const password = $('#authPassword').value;
+      try { const response = await fetch(`${apiBase}/api/auth/${authMode}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password }) }); const result = await response.json(); if (!response.ok) throw new Error(result.error || '登录失败'); authToken = result.token; localStorage.setItem('shiguang.authToken', authToken); const cloud = await loadCloudData(); if (!cloud.ok) throw new Error('无法连接同步服务，请稍后重试'); if (!cloud.hasData) await syncData(); closeModals(); renderAccount(result.user); if (cloud.hasData) window.location.reload(); else showToast('账号已准备好，当前数据已同步'); } catch (error) { $('#authHint').textContent = error.message; } }
     const recipeSets = [
       [
         { icon: 'salad', time: '25 分钟', name: '柠檬鸡胸藜麦碗', ingredients: '鸡胸 · 藜麦 · 番茄 · 牛油果' },
@@ -1026,6 +1067,7 @@
       });
       updateMustDoCount();
       try { localStorage.setItem('shiguang.theme', JSON.stringify({ selectedTheme, customName: $('#customThemeName').value, customDescription: $('#customThemeDescription').value })); } catch (error) { /* current session remains usable */ }
+      syncData();
     }
     function loadTheme() {
       try {
@@ -1068,6 +1110,7 @@
     }
     function saveGoalsToStorage() {
       try { localStorage.setItem('shiguang.goals', JSON.stringify(goals)); } catch (error) { /* current session remains usable */ }
+      syncData();
     }
     function escapeHtml(value) {
       return String(value).replace(/[&<>"']/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[character]);
@@ -1182,6 +1225,7 @@
     function saveDayRecord(date, record) {
       const next = { ...record, updatedAt: new Date().toISOString() };
       try { localStorage.setItem(dayRecordStorageKey(date), JSON.stringify(next)); } catch (error) { /* The current session remains usable. */ }
+      syncData();
       return next;
     }
     function formatMinutes(minutes) {
@@ -1458,6 +1502,7 @@
     function saveReview(type, period, review) {
       const next = { ...emptyReview(), ...review, updatedAt: new Date().toISOString() };
       try { localStorage.setItem(reviewStorageKey(type, period), JSON.stringify(next)); } catch (error) { /* current session remains usable */ }
+      syncData();
       return next;
     }
     function reviewHasContent(review) { return ['wins', 'strength', 'improve', 'stuck', 'lesson', 'next', 'pattern', 'adjust', 'memo', 'observeWins', 'observeStuck', 'observeBody', 'observeMoney', 'observeMood', 'observeSelf'].some(key => String(review?.[key] || '').trim()) || Boolean(review?.actions?.length); }
@@ -1588,6 +1633,7 @@
     function saveSkinCheck(date, values) {
       const next = { ...values, scale: 100, updatedAt: new Date().toISOString() };
       try { localStorage.setItem(skinStorageKey(date), JSON.stringify(next)); } catch (error) { /* current session remains usable */ }
+      syncData();
       return next;
     }
     function skinWeekSummary(week) {
@@ -1927,6 +1973,9 @@
     $('#openMeal').addEventListener('click', () => openMealEditor());
     $('#nextRecipeSet').addEventListener('click', () => { recipeSetIndex = (recipeSetIndex + 1) % recipeSets.length; renderRecipeSet(); showToast('已换一批晚餐菜谱'); });
     $('#openSettings').addEventListener('click', () => activateView('me'));
+    $('#openAuth').addEventListener('click', openAuth);
+    $('#authSubmit').addEventListener('click', submitAuth);
+    $('#authSwitch').addEventListener('click', () => { authMode = authMode === 'login' ? 'register' : 'login'; $('#authTitle').textContent = authMode === 'login' ? '登录拾光' : '创建拾光账号'; $('#authSubmit').textContent = authMode === 'login' ? '登录' : '创建账号'; $('#authSwitch').textContent = authMode === 'login' ? '创建账号' : '返回登录'; $('#authHint').textContent = '登录后，数据会在已登录设备之间同步。'; });
     $('#locationButton').addEventListener('click', refreshLocationWeather);
     $('#editProfile').addEventListener('click', () => {
       const currentName = $('#me-title').textContent;
@@ -2026,7 +2075,7 @@
       else goals.push({ id: `goal-${Date.now()}`, name, why, deadline, actions, icon: 'sparkles' });
       saveGoalsToStorage(); renderGoals(); editingGoal = null; closeModals(); showToast('目标已保存');
     });
-    $('#saveSettings').addEventListener('click', () => { try { localStorage.setItem('shiguang.settings', JSON.stringify({ reminderMode: $('#reminderMode').value, aiPrivacy: $('#aiPrivacy').value, exportFormat: $('#exportFormat').value })); } catch (error) { /* current session remains usable */ } closeModals(); showToast('设置已保存'); });
+    $('#saveSettings').addEventListener('click', () => { try { localStorage.setItem('shiguang.settings', JSON.stringify({ reminderMode: $('#reminderMode').value, aiPrivacy: $('#aiPrivacy').value, exportFormat: $('#exportFormat').value })); } catch (error) { /* current session remains usable */ } syncData(); closeModals(); showToast('设置已保存'); });
     $('#profileAvatarFile').addEventListener('change', event => {
       const file = event.target.files?.[0];
       if (!file) return;
@@ -2048,6 +2097,7 @@
       avatar.setAttribute('aria-label', savedProfileAvatar ? '已设置头像' : '默认头像');
       $('#profileTagline').textContent = tagline;
       try { localStorage.setItem('shiguang.profile', JSON.stringify({ name: name || '', tagline, avatar: savedProfileAvatar })); } catch (error) { /* current session remains usable */ }
+      syncData();
       closeModals(); showToast('资料已保存');
     });
     loadGoals();
@@ -2087,6 +2137,8 @@
     });
     dailyFeeling = loadDailyFeeling(selectedReviewDate);
     renderDailyFeeling(selectedReviewDate);
+    renderAccount(authToken ? { email: '已登录账号' } : null);
+    if (authToken) loadCloudData().then(cloud => { if (cloud.ok && cloud.hasData) window.location.reload(); else if (!cloud.ok) { authToken = ''; localStorage.removeItem('shiguang.authToken'); renderAccount(); } });
     refreshLocationWeather();
     if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
   </script>

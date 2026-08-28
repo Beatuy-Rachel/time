@@ -1,8 +1,11 @@
-FROM nginx:1.27-alpine
+FROM node:22-alpine
 
-COPY nginx.conf /etc/nginx/conf.d/default.conf
-COPY index.html manifest.json sw.js icon.svg /usr/share/nginx/html/
+WORKDIR /app
+COPY index.html manifest.json sw.js icon.svg server.js ./
+RUN mkdir -p /data
 
-EXPOSE 80
+ENV PORT=8080
+ENV DATA_DIR=/data
+EXPOSE 8080
 
-CMD ["nginx", "-g", "daemon off;"]
+CMD ["node", "server.js"]
