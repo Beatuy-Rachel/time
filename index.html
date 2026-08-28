@@ -156,6 +156,7 @@
     .dot-sage { background: var(--sage); } .dot-blue { background: var(--blue); } .dot-coral { background: var(--coral); } .dot-yellow { background: var(--yellow); }
     .habit-list { display: grid; gap: 8px; }
     .habit-row { display: flex; align-items: center; gap: 10px; background: transparent; padding: 9px 2px; border-bottom: 1px solid var(--line); }
+    .habit-empty, .must-empty { padding: 14px 2px; color: var(--muted); font-size: 11px; }
     .habit-check { appearance: none; width: 20px; height: 20px; border: 1.5px solid #b8c4bc; border-radius: 50%; position: relative; flex: 0 0 auto; cursor: pointer; background: transparent; }
     .habit-check:checked { border-color: var(--sage-dark); background: var(--sage-dark); }
     .habit-check:checked::after { content: ""; position: absolute; left: 5px; top: 2px; width: 6px; height: 10px; border: solid #fff; border-width: 0 2px 2px 0; transform: rotate(45deg); }
@@ -660,9 +661,9 @@
         </div>
 
         <div class="summary-strip">
-          <div class="summary-strip-head"><label>今天已记录</label><strong id="recordedTotal">7h 35m</strong></div>
+          <div class="summary-strip-head"><label>今天已记录</label><strong id="recordedTotal">0m</strong></div>
           <div class="progress-track" role="progressbar" aria-label="今日时间记录进度" aria-valuenow="68" aria-valuemin="0" aria-valuemax="100"><div class="progress-fill" id="recordProgress"></div></div>
-          <div class="summary-footer"><span>成长投入 1h 42m</span><span>计划完成 4 / 6</span></div>
+          <div class="summary-footer"><span>成长投入 0m</span><span>计划完成 0 / 0</span></div>
         </div>
 
         <div class="section-title"><h2>正在进行</h2><div class="section-tools"><button class="soft-button" id="openManual"><i data-lucide="plus" style="width:14px;height:14px"></i>手动补录</button><button class="soft-button" id="openStart"><i data-lucide="play" style="width:14px;height:14px"></i>开始活动</button></div></div>
@@ -683,10 +684,7 @@
 
         <div class="section-title"><h2>今天想照顾的自己</h2><span class="eyebrow" style="margin:0">4 / 6 已完成</span></div>
         <div class="habit-list">
-          <div class="habit-row"><input class="habit-check" type="checkbox" id="habit1" checked><label for="habit1">早间护肤</label><small>已完成 07:05</small></div>
-          <div class="habit-row"><input class="habit-check" type="checkbox" id="habit2" checked><label for="habit2">体态激活 8 分钟</label><small>已完成 07:18</small></div>
-          <div class="habit-row"><input class="habit-check" type="checkbox" id="habit3"><label for="habit3">力量训练</label><small>建议 18:30</small></div>
-          <div class="habit-row"><input class="habit-check" type="checkbox" id="habit4"><label for="habit4">晚间护肤 + 拉伸</label><small>建议 22:00</small></div>
+          <div class="habit-empty">今天还没有习惯记录。</div>
         </div>
       </section>
 
@@ -694,11 +692,9 @@
         <p class="eyebrow">计划与节奏</p><h2 class="hero-title" id="plan-title">给重要的事，留一点位置。</h2>
         <div class="section-title"><h2>今天的主题</h2><button class="text-button" id="editPlan">编辑计划 →</button></div>
         <div class="theme-day-card"><div class="theme-icon"><i data-lucide="heart-pulse"></i></div><div><h3 id="themeDayName">周四 · 温柔修复日</h3><p id="themeDayDescription">忙碌中留一点空间给身体：完成体态舒展、轻量训练和晚间放松。</p></div><button class="theme-edit" id="editTheme">更换</button></div>
-        <div class="section-title"><h2>今天必做 3 件事</h2><span class="eyebrow" id="mustDoCount" style="margin:0">1 / 3 已完成</span></div>
+        <div class="section-title"><h2>今天必做（可选）</h2><span class="eyebrow" id="mustDoCount" style="margin:0">0 / 0 已完成</span></div>
         <div class="must-do-list" id="mustDoList">
-          <div class="must-do-item"><input class="must-check" type="checkbox" id="must1" checked><label class="must-copy" for="must1"><strong>好好吃一顿晚餐</strong><small>照顾身体 · 选择一份高蛋白主食</small></label><span class="must-time">19:30</span></div>
-          <div class="must-do-item"><input class="must-check" type="checkbox" id="must2"><label class="must-copy" for="must2"><strong>体态舒展</strong><small>身体 · 8 分钟也算完成</small></label><span class="must-time">21:30</span></div>
-          <div class="must-do-item"><input class="must-check" type="checkbox" id="must3"><label class="must-copy" for="must3"><strong>确认婚礼场地方案</strong><small>婚礼准备 · 先看完一版方案</small></label><span class="must-time">25 分钟</span></div>
+          <div class="must-empty">还没有安排今天必做的事。</div>
         </div>
         <div class="section-title"><h2>本周进度</h2><button class="text-button" id="openCalendar">查看日历 →</button></div>
         <div class="metric-grid" aria-label="本周进度明细">
@@ -904,6 +900,13 @@
     const root = document.getElementById('app');
     const $ = (selector, scope = document) => scope.querySelector(selector);
     const $$ = (selector, scope = document) => [...scope.querySelectorAll(selector)];
+    function initializeFreshAppData() {
+      const marker = 'shiguang.fresh-start.v2';
+      if (localStorage.getItem(marker)) return;
+      Object.keys(localStorage).filter(key => key.startsWith('shiguang.')).forEach(key => localStorage.removeItem(key));
+      localStorage.setItem(marker, '1');
+    }
+    initializeFreshAppData();
     const modalIds = ['startModal', 'manualModal', 'summaryModal', 'mealModal', 'themeModal', 'planModal', 'goalModal', 'settingsModal', 'profileModal'];
     const activityStart = {};
     let toastTimer;
@@ -1008,7 +1011,8 @@
     function closeModals() { stopSpeechRecognition(false); modalIds.forEach(id => document.getElementById(id).classList.remove('open')); }
     function updateMustDoCount() {
       const completed = $$('#mustDoList .must-check:checked').length;
-      $('#mustDoCount').textContent = `${completed} / 3 已完成`;
+      const total = $$('#mustDoList .must-check').length;
+      $('#mustDoCount').textContent = `${completed} / ${total} 已完成`;
       syncTodayPlanSnapshot();
     }
     function applyTheme() {
