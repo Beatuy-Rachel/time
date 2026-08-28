@@ -96,6 +96,8 @@
     .mood-chip { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--sage-dark); background: var(--sage-pale); padding: 6px 10px; border-radius: 20px; }
     .day-actions { display: flex; align-items: center; gap: 10px; }
     .quick-capture { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
+    #summaryModal.quick-mode .voice-box, #summaryModal.quick-mode #generateAi { display: none; }
+    #summaryModal.quick-mode .modal-footer { justify-content: flex-end; }
     .summary-strip { margin-top: 20px; background: var(--surface); border: 1px solid var(--line); padding: 14px 16px; border-radius: 8px; }
     .summary-strip-head { display: flex; align-items: baseline; justify-content: space-between; }
     .summary-strip strong { font-size: 25px; font-weight: 500; }
@@ -1141,8 +1143,10 @@
       $('#dailyFeelingMeta').textContent = hasFeeling ? `已记录 ${new Date(dailyFeeling.updatedAt).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })} · 只对自己可见` : '只对自己可见';
       $('#editFeeling').textContent = hasFeeling ? '编辑感受' : '记录感受 +';
     }
-    function openDailyFeelingEditor() {
+    function openDailyFeelingEditor(quick = false) {
       dailyFeeling = loadDailyFeeling(selectedReviewDate);
+      $('#summaryModal').classList.toggle('quick-mode', quick);
+      $('#summaryTitle').textContent = quick ? '30 秒记录今天' : '说说今天';
       $('#summaryText').value = dailyFeeling?.text || '';
       $('#aiOutput').classList.remove('show');
       $('#generateAi').innerHTML = '<i data-lucide="sparkles" style="width:14px;height:14px"></i>保存并生成';
@@ -1890,9 +1894,9 @@
     $('#fabStart').addEventListener('click', () => openModal('startModal'));
     $('#openManual').addEventListener('click', () => openModal('manualModal'));
     $('#openManualTop').addEventListener('click', () => openModal('manualModal'));
-    $('#openSummary').addEventListener('click', openDailyFeelingEditor);
-    $('#quickCapture').addEventListener('click', openDailyFeelingEditor);
-    $('#editFeeling').addEventListener('click', openDailyFeelingEditor);
+    $('#openSummary').addEventListener('click', () => openDailyFeelingEditor(false));
+    $('#quickCapture').addEventListener('click', () => openDailyFeelingEditor(true));
+    $('#editFeeling').addEventListener('click', () => openDailyFeelingEditor(false));
     $('#openMeal').addEventListener('click', () => openMealEditor());
     $('#nextRecipeSet').addEventListener('click', () => { recipeSetIndex = (recipeSetIndex + 1) % recipeSets.length; renderRecipeSet(); showToast('已换一批晚餐菜谱'); });
     $('#openSettings').addEventListener('click', () => activateView('me'));
@@ -1960,7 +1964,7 @@
     $('#saveFeeling').addEventListener('click', () => { saveDailyFeeling(); });
     $('#generateAi').addEventListener('click', () => { if (!saveDailyFeeling(false)) return; $('#aiOutput').classList.add('show'); $('#generateAi').innerHTML = '<i data-lucide="check" style="width:14px;height:14px"></i>已保存并生成'; lucide.createIcons({ attrs: { width: 16, height: 16, 'stroke-width': 1.8 } }); showToast('感受已保存，复盘已整理好'); });
     $('#planTomorrow').addEventListener('click', () => { activateView('plan'); showToast('已加入明日计划：确认婚礼场地方案'); });
-    $('#editReview').addEventListener('click', openDailyFeelingEditor);
+    $('#editReview').addEventListener('click', () => openDailyFeelingEditor(false));
     $('#saveMeal').addEventListener('click', () => {
       const type = $('#mealType').value; const content = $('#mealContent').value.trim(); const feel = $('#mealFeel').value;
       if (!content) { showToast('先写下今天吃了什么'); return; }
