@@ -265,6 +265,13 @@
     .daily-feeling-head h3 { margin: 0; font-size: 14px; font-weight: 500; }
     .daily-feeling-card p { margin: 9px 0 0; font-size: 12px; line-height: 1.75; white-space: pre-wrap; }
     .daily-feeling-card .feeling-meta { color: var(--muted); font-size: 10px; margin-top: 5px; }
+    .thought-link { border: 0; background: transparent; color: var(--sage-dark); font: inherit; font-size: 11px; padding: 4px 0; cursor: pointer; }
+    .thought-link:hover { text-decoration: underline; }
+    .thought-list { display: grid; gap: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+    .thought-item { display: grid; grid-template-columns: 74px 1fr; gap: 10px; padding: 11px 12px; border-bottom: 1px solid var(--line); }
+    .thought-item:last-child { border-bottom: 0; }
+    .thought-item label { color: var(--muted); font-size: 10px; }
+    .thought-item p { margin: 0; font-size: 12px; line-height: 1.6; white-space: pre-wrap; word-break: break-word; }
     .history-controls { display: grid; grid-template-columns: 34px 1fr 34px; gap: 8px; align-items: center; margin: 15px 0 10px; }
     .history-nav-button { width: 34px; height: 34px; border: 1px solid var(--line); border-radius: 7px; background: var(--surface); color: var(--muted); display: grid; place-items: center; }
     .history-nav-button:hover { color: var(--sage-dark); border-color: var(--sage); }
@@ -739,7 +746,7 @@
         <p class="eyebrow">复盘 · 让经验留下来</p><h2 class="hero-title" id="review-title">把每一天过得更有把握。</h2><p class="review-purpose">自律不是每天满分，而是每天留下事实，定期回看，再调整下一步。</p>
         <div class="review-tabs" role="tablist" aria-label="复盘类型"><button class="review-tab active" role="tab" aria-selected="true" data-review-view="day">日复盘</button><button class="review-tab" role="tab" aria-selected="false" data-review-view="week">周复盘</button><button class="review-tab" role="tab" aria-selected="false" data-review-view="month">月复盘</button></div>
         <div class="review-panel active" id="review-day">
-        <div class="daily-feeling-card" id="dailyFeelingCard"><div class="daily-feeling-head"><h3 id="dailyFeelingTitle">今日感受</h3><button class="text-button" id="editFeeling">记录感受 +</button></div><p id="dailyFeelingText">今天还没有写下感受。可以记录一下心情、身体状态，或今天发生的事。</p><p class="feeling-meta" id="dailyFeelingMeta">只对自己可见</p></div>
+        <div class="daily-feeling-card" id="dailyFeelingCard"><div class="daily-feeling-head"><h3 id="dailyFeelingTitle">今日感受</h3><div><button class="thought-link" id="jumpToThoughts" type="button">回看今日想法</button><button class="text-button" id="editFeeling">记录感受 +</button></div></div><p id="dailyFeelingText">今天还没有写下感受。可以记录一下心情、身体状态，或今天发生的事。</p><p class="feeling-meta" id="dailyFeelingMeta">只对自己可见</p></div>
         <div class="review-template" id="dayReviewTemplate">
           <div class="review-template-head"><div><h3>行动复盘</h3><p>回顾每天做了什么，每天进步一点点。</p></div><span class="review-save-state" id="dayReviewSaveState">未填写</span></div>
           <div class="review-template-fields"><div class="review-template-field"><label for="dayReviewWins">今天我完成了……</label><textarea id="dayReviewWins" placeholder="写下今天实际完成的事情，不需要包装"></textarea></div><div class="review-template-field"><label for="dayReviewStrength">我做得好的……</label><textarea id="dayReviewStrength" placeholder="哪些做法、选择或坚持值得保留？"></textarea></div><div class="review-template-field"><label for="dayReviewImprove">我可以改进的……</label><textarea id="dayReviewImprove" placeholder="明天只改进一个具体的小地方"></textarea></div><div class="review-template-field"><label for="dayReviewNext">我的下一步行动……</label><textarea id="dayReviewNext" placeholder="写一个明天可以直接开始的动作"></textarea></div></div>
@@ -753,6 +760,8 @@
         <div class="history-record-list" id="historyRecordList"><div class="history-empty">这一天还没有时间记录。完成一段活动或手动补录后，就会沉淀在这里。</div></div>
         <div class="history-section-title"><h3>吃了什么</h3><span id="historyMealCount">暂无记录</span></div>
         <div class="history-record-list" id="historyMealList"><div class="history-empty">饮食记录会和这一天一起保存，方便之后回看状态。</div></div>
+        <div class="history-section-title"><h3>今日想法</h3><span id="historyThoughtCount">暂无记录</span></div>
+        <div class="thought-list" id="historyThoughtList"><div class="history-empty">感受和行动复盘会汇总在这里，方便回看。</div></div>
         <div class="section-title"><h2>今日 AI 复盘</h2><button class="soft-button" id="openSummary"><i data-lucide="mic" style="width:14px;height:14px"></i>说说今天</button></div>
         <div class="review-card"><span class="review-tag">AI 复盘 · 基于你保存的记录</span><h3 id="reviewHeadline">记录完成后，这里会形成你的当天总结。</h3><p id="reviewSummary">先记录几段活动、饮食和感受，AI 会根据真实数据帮你整理今天的节奏。</p><div class="review-actions"><button class="soft-button" id="editReview">编辑文字</button><button class="primary-button" id="planTomorrow">加入明日计划</button></div></div>
         <div class="section-title"><h2>这一天的发现</h2></div>
@@ -1361,6 +1370,16 @@
       dailyFeeling = loadDailyFeeling(selectedReviewDate);
       renderDailyFeeling(selectedReviewDate);
       const dayReview = loadReview('day', selectedReviewDate);
+      const thoughts = [
+        ['今日感受', feeling?.text],
+        ['完成了', dayReview.wins],
+        ['做得好的', dayReview.strength],
+        ['可以改进', dayReview.improve || dayReview.stuck],
+        ['下一步行动', dayReview.next]
+      ].filter(([, text]) => text);
+      const thoughtList = $('#historyThoughtList');
+      thoughtList.innerHTML = thoughts.length ? thoughts.map(([label, text]) => `<div class="thought-item"><label>${escapeHtml(label)}</label><p>${escapeHtml(text)}</p></div>`).join('') : '<div class="history-empty">感受和行动复盘会汇总在这里，方便回看。</div>';
+      $('#historyThoughtCount').textContent = thoughts.length ? `${thoughts.length} 条想法` : '暂无记录';
       const dayReviewFields = { wins: '#dayReviewWins', strength: '#dayReviewStrength', improve: '#dayReviewImprove', next: '#dayReviewNext' };
       Object.entries(dayReviewFields).forEach(([key, selector]) => { const field = $(selector); if (field && document.activeElement !== field) field.value = key === 'improve' ? (dayReview.improve || dayReview.stuck || '') : (dayReview[key] || ''); });
       $('#dayReviewSaveState').textContent = dayReview.updatedAt ? `已保存 ${new Date(dayReview.updatedAt).toLocaleDateString('zh-CN', { month: 'numeric', day: 'numeric' })}` : '未填写';
@@ -1848,7 +1867,7 @@
     $('#saveSkinCheck').addEventListener('click', () => { const values = Object.fromEntries(skinDimensions.map(item => [item.key, Number($(item.input).value)])); saveSkinCheck(selectedReviewDate, values); renderWeekReview(); showToast('今日皮肤状态已保存'); });
     $('#monthReviewPrev').addEventListener('click', () => { monthReviewOffset -= 1; renderMonthReview(); });
     $('#monthReviewNext').addEventListener('click', () => { monthReviewOffset += 1; renderMonthReview(); });
-    $('#saveDayReview').addEventListener('click', () => { const review = saveReview('day', selectedReviewDate, { wins: $('#dayReviewWins').value.trim(), strength: $('#dayReviewStrength').value.trim(), improve: $('#dayReviewImprove').value.trim(), stuck: $('#dayReviewImprove').value.trim(), next: $('#dayReviewNext').value.trim() }); $('#dayReviewSaveState').textContent = `已保存 ${new Date(review.updatedAt).toLocaleDateString('zh-CN', { month: 'numeric', day: 'numeric' })}`; renderReviewTrace(weekDatesForAnchor(selectedReviewDate), '#weekDayTrace'); renderMonthReview(); showToast('今日行动复盘已保存'); });
+    $('#saveDayReview').addEventListener('click', () => { const review = saveReview('day', selectedReviewDate, { wins: $('#dayReviewWins').value.trim(), strength: $('#dayReviewStrength').value.trim(), improve: $('#dayReviewImprove').value.trim(), stuck: $('#dayReviewImprove').value.trim(), next: $('#dayReviewNext').value.trim() }); $('#dayReviewSaveState').textContent = `已保存 ${new Date(review.updatedAt).toLocaleDateString('zh-CN', { month: 'numeric', day: 'numeric' })}`; renderHistoryDate(); renderReviewTrace(weekDatesForAnchor(selectedReviewDate), '#weekDayTrace'); renderMonthReview(); showToast('今日行动复盘已保存'); });
     $('#saveWeekReview').addEventListener('click', () => { const period = weekReviewPeriod(selectedReviewDate); const previous = loadReview('week', period); const review = saveReview('week', period, { observeWins: $('#weekObserveWins').value.trim(), observeStuck: $('#weekObserveStuck').value.trim(), observeBody: $('#weekObserveBody').value.trim(), observeMoney: $('#weekObserveMoney').value.trim(), observeMood: $('#weekObserveMood').value.trim(), observeSelf: $('#weekObserveSelf').value.trim(), actions: previous.actions || [] }); $('#weekReviewSaveState').textContent = `已保存 ${new Date(review.updatedAt).toLocaleDateString('zh-CN', { month: 'numeric', day: 'numeric' })}`; renderReviewTrace(weekDatesForAnchor(selectedReviewDate), '#weekDayTrace'); renderMonthReview(); showToast('本周复盘已保存'); });
     $('#addWeekAction').addEventListener('click', () => { const input = $('#weekActionInput'); const text = input.value.trim(); if (!text) { showToast('先写下一个下周待办'); return; } const period = weekReviewPeriod(selectedReviewDate); const review = loadReview('week', period); review.actions.push({ id: `week-action-${Date.now()}`, text, date: $('#weekActionDate').value, priority: $('#weekActionPriority').value, done: false }); saveReview('week', period, review); input.value = ''; renderWeekActions(review.actions); showToast('已加入下周待办'); });
     $('#saveMonthReview').addEventListener('click', () => { const period = monthReviewPeriod(monthReviewDate()); const actionsByArea = Object.fromEntries($$('#monthActionGrid [data-month-action]').map(field => [field.dataset.monthAction, field.value.trim()])); const review = saveReview('month', period, { wins: $('#monthReviewWins').value.trim(), pattern: $('#monthReviewPattern').value.trim(), adjust: $('#monthReviewAdjust').value.trim(), memo: $('#monthReviewMemo').value.trim(), actionsByArea }); renderMonthReview(); showToast('本月复盘已保存'); });
@@ -1884,6 +1903,7 @@
     $('#themeSelect').addEventListener('change', () => { $('#customThemeFields').hidden = $('#themeSelect').value !== '__custom__'; });
     $('#openCalendar').addEventListener('click', () => activateView('calendar'));
     $('#openCalendarFromReview').addEventListener('click', () => activateView('calendar'));
+    $('#jumpToThoughts').addEventListener('click', () => $('#historyThoughtList')?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
     $$('[data-progress-target]').forEach(button => button.addEventListener('click', () => openWeeklyProgress(button.dataset.progressTarget)));
     $('#addCalendarPlan').addEventListener('click', () => openPlanEditor());
     $('#calendarPrev').addEventListener('click', () => { calendarWeekOffset -= 1; renderCalendar(); showToast('已查看上一周'); });
