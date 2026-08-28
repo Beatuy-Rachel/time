@@ -33,6 +33,8 @@ cd "$SCRIPT_DIR"
 [ -f compose.yaml ] || fail "compose.yaml not found in $SCRIPT_DIR"
 command -v docker >/dev/null 2>&1 || fail 'docker command not found'
 docker info >/dev/null 2>&1 || fail 'Docker service is not available'
+[ -n "${AUTH_SECRET:-}" ] || fail 'AUTH_SECRET must be set in .env'
+[ -n "${POSTGRES_PASSWORD:-}" ] || fail 'POSTGRES_PASSWORD must be set in .env'
 
 if [ -n "${GHCR_TOKEN:-}" ] || [ -n "${GHCR_USERNAME:-}" ]; then
     [ -n "${GHCR_TOKEN:-}" ] && [ -n "${GHCR_USERNAME:-}" ] || \

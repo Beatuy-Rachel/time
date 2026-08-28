@@ -23,7 +23,11 @@ services:
       - "${HOST_PORT:-8080}:8080"
     environment:
       PORT: 8080
-      DATABASE_URL: "postgresql://${POSTGRES_USER:-time_record}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-time_record}"
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: "${POSTGRES_DB:-time_record}"
+      POSTGRES_USER: "${POSTGRES_USER:-time_record}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set in .env}"
       AUTH_SECRET: "${AUTH_SECRET:?AUTH_SECRET must be set in .env}"
     depends_on:
       db:

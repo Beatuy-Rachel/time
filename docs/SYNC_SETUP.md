@@ -11,7 +11,7 @@ cp .env.example .env
 openssl rand -hex 32
 ```
 
-将生成的值填入 `AUTH_SECRET`，然后执行 `./deploy.sh`。默认通过服务器的 `8080` 端口访问，账号和同步数据保存在 PostgreSQL 的 `./postgres-data` 数据卷，升级镜像不会丢失。请给站点配置 HTTPS，不要在公网 HTTP 下输入密码。
+将生成的值填入 `AUTH_SECRET`，并为 `POSTGRES_PASSWORD` 设置强密码，然后执行 `./deploy.sh`。默认通过服务器的 `8080` 端口访问，账号和同步数据保存在 PostgreSQL 的 `./postgres-data` 数据卷，升级镜像不会丢失。请给站点配置 HTTPS，不要在公网 HTTP 下输入密码。
 
 数据库使用 PostgreSQL 16。应用启动时会自动创建 `users` 和 `user_data` 表，不需要手动执行 SQL。`.env` 中还需要设置 `POSTGRES_PASSWORD`、`POSTGRES_DB`、`POSTGRES_USER` 和 `AUTH_SECRET`。
 
@@ -33,7 +33,7 @@ ghcr.io/beatuy-rachel/time:latest
 echo "$CR_PAT" | docker login ghcr.io -u Beatuy-Rachel --password-stdin
 docker pull ghcr.io/beatuy-rachel/time:latest
 docker rm -f time-record 2>/dev/null || true
-docker run -d --name time-record --restart unless-stopped -p 8080:8080 -e DATABASE_URL='postgresql://用户:密码@数据库地址:5432/time_record' -e AUTH_SECRET='随机长字符串' ghcr.io/beatuy-rachel/time:latest
+docker run -d --name time-record --restart unless-stopped -p 8080:8080 -e POSTGRES_HOST='数据库地址' -e POSTGRES_DB='time_record' -e POSTGRES_USER='用户' -e POSTGRES_PASSWORD='强密码' -e AUTH_SECRET='随机长字符串' ghcr.io/beatuy-rachel/time:latest
 ```
 
 然后访问服务器的 `8080` 端口。若镜像设置为公开，服务器拉取时不需要登录；若设置为私有，需要使用具有 `read:packages` 权限的 GitHub Token 登录。

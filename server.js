@@ -5,10 +5,14 @@ const crypto = require('crypto');
 const { Pool } = require('pg');
 
 const PORT = Number(process.env.PORT || 8080);
-const DATABASE_URL = process.env.DATABASE_URL || '';
+const databaseConfig = process.env.DATABASE_URL
+  ? { connectionString: process.env.DATABASE_URL }
+  : process.env.POSTGRES_HOST && process.env.POSTGRES_PASSWORD
+    ? { host: process.env.POSTGRES_HOST, port: Number(process.env.POSTGRES_PORT || 5432), database: process.env.POSTGRES_DB || 'time_record', user: process.env.POSTGRES_USER || 'time_record', password: process.env.POSTGRES_PASSWORD }
+    : null;
 const TOKEN_SECRET = process.env.AUTH_SECRET || 'change-this-auth-secret';
 const MAX_BODY = 2 * 1024 * 1024;
-const pool = new Pool({ connectionString: DATABASE_URL, max: 10, idleTimeoutMillis: 30000 });
+const pool = databaseConfig ? new Pool({ ...databaseConfig, max: 10, idleTimeoutMillis: 30000 }) : null;
 
 function id(value) { return crypto.createHash('sha256').update(value).digest('hex'); }
 function hashPassword(password, salt = crypto.randomBytes(16).toString('hex')) { return `${salt}:${crypto.scryptSync(password, salt, 64).toString('hex')}`; }
@@ -28,7 +32,7 @@ function safeEmail(value) { return String(value || '').trim().toLowerCase(); }
 function publicUser(user) { return { id: user.id, email: user.email, createdAt: user.created_at }; }
 
 async function initDatabase() {
-  if (!DATABASE_URL) throw new Error('DATABASE_URL is required');
+  if (!pool) throw new Error('PostgreSQL configuration is required');
   await pool.query('CREATE TABLE IF NOT EXISTS users (id text PRIMARY KEY, email text UNIQUE NOT NULL, password_hash text NOT NULL, created_at timestamptz NOT NULL DEFAULT now())');
   await pool.query("CREATE TABLE IF NOT EXISTS user_data (user_id text PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE, payload jsonb NOT NULL DEFAULT '{}'::jsonb, updated_at timestamptz NOT NULL DEFAULT now())");
 }
