@@ -232,6 +232,7 @@
     .plan-check:checked::after { content: ""; position: absolute; left: 6px; top: 3px; width: 6px; height: 10px; border: solid #fff; border-width: 0 2px 2px 0; transform: rotate(45deg); }
     .plan-status { display: block; color: var(--sage-dark); font-size: 10px; margin-top: 4px; }
     .plan-list { display: grid; gap: 8px; }
+    .plan-empty { padding: 16px 14px; border: 1px dashed var(--line); border-radius: 8px; color: var(--muted); font-size: 11px; text-align: center; }
     .plan-item { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 13px; display: flex; align-items: center; gap: 11px; }
     .plan-item .plan-copy { flex: 1; }
     .plan-item strong { font-size: 13px; font-weight: 500; display: block; }
@@ -714,11 +715,9 @@
             <p>本周计划</p><strong id="homePlanValue">0 <small>/ 0 项</small></strong><div class="metric-progress yellow" aria-hidden="true"><span id="homePlanProgress" style="width:0%"></span></div><em id="homePlanHint">本周实际完成</em>
           </button>
         </div>
-        <div class="section-title"><h2>今日计划</h2><button class="text-button" id="addPlan">添加一项 +</button></div>
+        <div class="section-title"><h2>今日计划（可选）</h2><button class="text-button" id="addPlan">添加一项 +</button></div>
         <div class="plan-list" id="planList">
-          <article class="plan-item" data-plan-name="力量训练 · 下肢" data-plan-category="身体" data-plan-time="18:30" data-plan-duration="45 分钟"><input class="plan-check" type="checkbox" aria-label="完成力量训练 · 下肢"><i data-lucide="dumbbell" style="color:var(--coral)"></i><span class="plan-copy"><strong>力量训练 · 下肢</strong><small>身体 · 45 分钟</small><span class="plan-status"></span></span><span class="time">18:30</span></article>
-          <article class="plan-item" data-plan-name="体态舒展" data-plan-category="身体" data-plan-time="21:30" data-plan-duration="8 分钟"><input class="plan-check" type="checkbox" aria-label="完成体态舒展"><i data-lucide="stretch-horizontal" style="color:var(--sage-dark)"></i><span class="plan-copy"><strong>体态舒展</strong><small>身体 · 8 分钟</small><span class="plan-status"></span></span><span class="time">21:30</span></article>
-          <article class="plan-item" data-plan-name="确认婚礼场地方案" data-plan-category="婚礼准备" data-plan-time="" data-plan-duration="25 分钟"><input class="plan-check" type="checkbox" aria-label="完成确认婚礼场地方案"><i data-lucide="heart-handshake" style="color:var(--yellow)"></i><span class="plan-copy"><strong>确认婚礼场地方案</strong><small>婚礼准备 · 优先事项</small><span class="plan-status"></span></span><span class="time">待安排</span></article>
+          <div class="plan-empty">今天还没有安排。只添加一件真正重要的事，也完全可以。</div>
         </div>
         <div class="section-title"><h2>未来目标</h2></div>
         <div class="plan-banner" id="weddingPlanBanner"><i class="plan-icon" data-lucide="sparkles"></i><div><h3 id="weddingPlanHeadline">把想要的生活写下来</h3><p id="weddingPlanCopy">添加一个目标后，这里会显示目标日期和下一步行动。</p></div></div>
@@ -2045,6 +2044,7 @@
         editingPlan.innerHTML = `<input class="plan-check" type="checkbox" aria-label="完成${name}"><i data-lucide="${iconForCategory(category)}" style="color:${colorForCategory(category)}"></i><span class="plan-copy"><strong>${name}</strong><small>${category} · ${duration}</small><span class="plan-status"></span></span><span class="time">${time || '待安排'}</span>`;
         lucide.createIcons({ attrs: { width: 16, height: 16, 'stroke-width': 1.8 } }); editingPlan.dataset.boundPlan = ''; bindPlanItem(editingPlan); setPlanDone(editingPlan, done, false); showToast(`已更新「${name}」`);
       } else {
+        $('.plan-empty', $('#planList'))?.remove();
         const row = document.createElement('article'); row.className = 'plan-item'; row.dataset.planName = name; row.dataset.planCategory = category; row.dataset.planTime = time; row.dataset.planDuration = duration;
         row.innerHTML = `<input class="plan-check" type="checkbox" aria-label="完成${name}"><i data-lucide="${iconForCategory(category)}" style="color:${colorForCategory(category)}"></i><span class="plan-copy"><strong>${name}</strong><small>${category} · ${duration}</small><span class="plan-status"></span></span><span class="time">${time || '待安排'}</span>`;
         $('#planList').appendChild(row); lucide.createIcons({ attrs: { width: 16, height: 16, 'stroke-width': 1.8 } }); bindPlanItem(row);
