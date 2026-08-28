@@ -1194,7 +1194,8 @@
     }
     function durationBetweenTimes(start, end) {
       const from = minutesFromTime(start); let to = minutesFromTime(end);
-      if (to <= from) to += 24 * 60;
+      if (to < from) to += 24 * 60;
+      if (to === from) return 1;
       return Math.max(1, to - from);
     }
     function activityCategory(name) {
@@ -1213,8 +1214,9 @@
     function activityInterval(activity) {
       const start = Number.isFinite(Number(activity.startMinute)) ? Number(activity.startMinute) : minutesFromTime(activity.start);
       let end = Number.isFinite(Number(activity.endMinute)) ? Number(activity.endMinute) : start + (Number(activity.durationMinutes) || 0);
-      if (end <= start) end += 24 * 60;
-      return [start, end];
+      if (end < start) end += 24 * 60;
+      if (end === start) end = start + Math.max(1, Number(activity.durationMinutes) || 0);
+      return [Math.max(0, Math.min(24 * 60, start)), Math.max(0, Math.min(24 * 60, end))];
     }
     function unionMinutes(activities) {
       const intervals = activities.map(activityInterval).filter(([start, end]) => end > start).sort((a, b) => a[0] - b[0]);
