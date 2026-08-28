@@ -1294,7 +1294,7 @@
       const meals = loadDayRecord().meals;
       $$('.meal-item', grid).forEach(item => {
         const type = item.dataset.mealType || item.dataset.newMealType;
-        const saved = [...meals].reverse().find(meal => meal.type === type);
+        const saved = [...meals].reverse().find(meal => meal.type === type && String(meal.content || '').trim());
         const copy = $('.meal-copy', item);
         if (!saved) {
           item.dataset.mealType = type;
@@ -1312,15 +1312,15 @@
         }
         item.dataset.mealId = saved.id;
         item.dataset.mealType = saved.type;
-        item.dataset.mealContent = saved.content;
+        item.dataset.mealContent = saved.content || '';
         item.dataset.mealFeel = saved.feel || '已记录';
         delete item.dataset.newMealType;
         if (copy) {
-          $('strong', copy).textContent = `${saved.type} · ${saved.content}`;
+          $('strong', copy).textContent = `${saved.type} · ${saved.content || ''}`;
           $('p', copy).textContent = `${saved.time || '今天'} · ${saved.feel || '已记录'} · 记录完整`;
         }
         $('.meal-add', item).innerHTML = '<i data-lucide="chevron-right"></i>';
-        item.setAttribute('aria-label', `编辑${saved.type}：${saved.content}`);
+        item.setAttribute('aria-label', `编辑${saved.type}：${saved.content || ''}`);
       });
       lucide.createIcons({ attrs: { width: 16, height: 16, 'stroke-width': 1.8 } });
     }
@@ -1362,8 +1362,9 @@
       lucide.createIcons({ attrs: { width: 16, height: 16, 'stroke-width': 1.8 } });
       $('#historyRecordCount').textContent = summary.activities.length ? `${summary.activities.length} 条记录` : '暂无记录';
       const mealList = $('#historyMealList'); const meals = [...summary.record.meals].sort((a, b) => String(a.time || '').localeCompare(String(b.time || '')));
-      mealList.innerHTML = meals.length ? meals.map(meal => `<div class="history-record"><span class="history-record-time">${escapeHtml(meal.time || '--:--')}</span><div class="history-record-copy"><strong>${escapeHtml(meal.type || '饮食')}</strong><small>${escapeHtml(meal.content)} · ${escapeHtml(meal.feel || '已记录')}</small></div><span class="history-record-tag">饮食</span></div>`).join('') : '<div class="history-empty">饮食记录会和这一天一起保存，方便之后回看状态。</div>';
-      $('#historyMealCount').textContent = meals.length ? `${meals.length} 条记录` : '暂无记录';
+      const visibleMeals = meals.filter(meal => String(meal.content || '').trim());
+      mealList.innerHTML = visibleMeals.length ? visibleMeals.map(meal => `<div class="history-record"><span class="history-record-time">${escapeHtml(meal.time || '--:--')}</span><div class="history-record-copy"><strong>${escapeHtml(meal.type || '饮食')}</strong><small>${escapeHtml(meal.content || '')}${meal.feel ? ` · ${escapeHtml(meal.feel)}` : ''}</small></div><span class="history-record-tag">饮食</span></div>`).join('') : '<div class="history-empty">饮食记录会和这一天一起保存，方便之后回看状态。</div>';
+      $('#historyMealCount').textContent = visibleMeals.length ? `${visibleMeals.length} 条记录` : '暂无记录';
       const feeling = loadDailyFeeling(selectedReviewDate);
       $('#reviewHeadline').textContent = feeling?.text ? '你已经把这一天留了下来。' : (summary.activities.length ? '你正在用记录，看见自己的节奏。' : '记录完成后，这里会形成你的当天总结。');
       $('#reviewSummary').textContent = feeling?.text ? feeling.text : (summary.activities.length ? `今天保存了 ${summary.activities.length} 段活动，共 ${formatMinutes(summary.actualMinutes)}；成长投入 ${formatMinutes(summary.growthMinutes)}。继续记录感受后，AI 会帮你整理得更清楚。` : '先记录几段活动、饮食和感受，AI 会根据真实数据帮你整理今天的节奏。');
@@ -1630,7 +1631,7 @@
       const type = item ? (item.dataset.mealType || item.dataset.newMealType) : (newType || '晚餐');
       $('#mealTitle').textContent = item?.dataset.mealContent ? `编辑${type}` : `记录${type}`;
       $('#mealType').value = type;
-      $('#mealContent').value = item ? item.dataset.mealContent : presetContent;
+      $('#mealContent').value = item?.dataset.mealContent || presetContent || '';
       $('#mealFeel').value = item ? item.dataset.mealFeel : '刚刚好';
       openModal('mealModal');
     }
