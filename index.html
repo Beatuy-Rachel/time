@@ -179,6 +179,7 @@
     .metric-progress.coral span { background: var(--coral); }
     .metric-progress.blue span { background: var(--blue); }
     .metric-progress.yellow span { background: var(--yellow); }
+    .progress-focus { outline: 2px solid var(--sage); outline-offset: 5px; transition: outline-color .2s; }
     .goal-list { display: grid; gap: 10px; }
     .goal-card { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 14px; }
     .goal-card-head { display: flex; gap: 10px; align-items: flex-start; }
@@ -696,17 +697,17 @@
         </div>
         <div class="section-title"><h2>本周进度</h2><button class="text-button" id="openCalendar">查看日历 →</button></div>
         <div class="metric-grid" aria-label="本周进度明细">
-          <button class="metric metric-button" type="button" data-progress-target="training" aria-label="查看训练进度，已完成 2 次，共 4 次">
+          <button class="metric metric-button" type="button" data-progress-target="training" aria-label="查看本周训练明细">
             <span class="metric-top"><span class="metric-icon coral"><i data-lucide="dumbbell"></i></span><span class="metric-action">查看明细 <i data-lucide="chevron-right"></i></span></span>
-            <p>训练</p><strong>2 <small>/ 4 次</small></strong><div class="metric-progress coral" aria-hidden="true"><span style="width:50%"></span></div><em>还剩 2 次</em>
+            <p>训练</p><strong id="homeTrainingValue">0 <small>次</small></strong><div class="metric-progress coral" aria-hidden="true"><span id="homeTrainingProgress" style="width:0%"></span></div><em id="homeTrainingHint">本周实际记录</em>
           </button>
-          <button class="metric metric-button" type="button" data-progress-target="reading" aria-label="查看阅读进度，已完成 86%">
+          <button class="metric metric-button" type="button" data-progress-target="reading" aria-label="查看本周阅读明细">
             <span class="metric-top"><span class="metric-icon blue"><i data-lucide="book-open"></i></span><span class="metric-action">查看明细 <i data-lucide="chevron-right"></i></span></span>
-            <p>阅读</p><strong>86<small>%</small></strong><div class="metric-progress blue" aria-hidden="true"><span style="width:86%"></span></div><em>稳定上升</em>
+            <p>阅读</p><strong id="homeReadingValue">0 <small>分钟</small></strong><div class="metric-progress blue" aria-hidden="true"><span id="homeReadingProgress" style="width:0%"></span></div><em id="homeReadingHint">本周实际记录</em>
           </button>
-          <button class="metric metric-button" type="button" data-progress-target="wedding" aria-label="查看婚礼事项进度，已完成 7 项，共 12 项">
+          <button class="metric metric-button" type="button" data-progress-target="wedding" aria-label="查看本周计划明细">
             <span class="metric-top"><span class="metric-icon yellow"><i data-lucide="heart-handshake"></i></span><span class="metric-action">查看明细 <i data-lucide="chevron-right"></i></span></span>
-            <p>婚礼事项</p><strong>7 <small>/ 12 项</small></strong><div class="metric-progress yellow" aria-hidden="true"><span style="width:58%"></span></div><em>本周完成</em>
+            <p>本周计划</p><strong id="homePlanValue">0 <small>/ 0 项</small></strong><div class="metric-progress yellow" aria-hidden="true"><span id="homePlanProgress" style="width:0%"></span></div><em id="homePlanHint">本周实际完成</em>
           </button>
         </div>
         <div class="section-title"><h2>今日计划</h2><button class="text-button" id="addPlan">添加一项 +</button></div>
@@ -1338,9 +1339,34 @@
       if (footer[0]) footer[0].textContent = `成长投入 ${formatMinutes(summary.growthMinutes)}`;
       const plan = summary.record.plan || { done: 0, total: 0 };
       if (footer[1]) footer[1].textContent = `计划完成 ${plan.done} / ${plan.total}`;
+      renderHomeProgress();
       renderTodayTimeline();
       renderMealGrid();
       renderCalendar();
+    }
+    function currentWeekDates() {
+      const anchor = new Date(); const day = anchor.getDay();
+      const monday = new Date(anchor);
+      monday.setDate(anchor.getDate() + (day === 0 ? -6 : 1 - day));
+      return Array.from({ length: 7 }, (_, index) => { const date = new Date(monday); date.setDate(monday.getDate() + index); return date; });
+    }
+    function renderHomeProgress() {
+      const dates = currentWeekDates();
+      const summaries = dates.map(date => ({ date, summary: buildDaySummary(date) }));
+      const activities = weekActivityRows(summaries);
+      const training = activities.filter(item => /健身|打球|瑜伽|训练|体态/.test(item.name || ''));
+      const readingMinutes = activities.filter(item => /阅读/.test(item.name || '')).reduce((sum, item) => sum + item.minutes, 0);
+      const plans = summaries.reduce((result, item) => { result.done += Number(item.summary.record.plan.done) || 0; result.total += Number(item.summary.record.plan.total) || 0; return result; }, { done: 0, total: 0 });
+      const trainingValue = $('#homeTrainingValue'); const readingValue = $('#homeReadingValue'); const planValue = $('#homePlanValue');
+      if (trainingValue) trainingValue.innerHTML = `${training.length} <small>次</small>`;
+      if ($('#homeTrainingProgress')) $('#homeTrainingProgress').style.width = `${Math.min(100, training.length ? 100 : 0)}%`;
+      if ($('#homeTrainingHint')) $('#homeTrainingHint').textContent = training.length ? `${formatMinutes(training.reduce((sum, item) => sum + item.minutes, 0))} 投入` : '本周还没有记录';
+      if (readingValue) readingValue.innerHTML = `${formatMinutes(readingMinutes)} <small>投入</small>`;
+      if ($('#homeReadingProgress')) $('#homeReadingProgress').style.width = `${Math.min(100, Math.round(readingMinutes / 180 * 100))}%`;
+      if ($('#homeReadingHint')) $('#homeReadingHint').textContent = readingMinutes ? '按活动记录统计' : '本周还没有记录';
+      if (planValue) planValue.innerHTML = `${plans.done} <small>/ ${plans.total} 项</small>`;
+      if ($('#homePlanProgress')) $('#homePlanProgress').style.width = `${plans.total ? Math.min(100, Math.round(plans.done / plans.total * 100)) : 0}%`;
+      if ($('#homePlanHint')) $('#homePlanHint').textContent = plans.total ? '本周计划完成' : '本周还没有计划';
     }
     function renderHistoryDate() {
       if (!selectedReviewDate) selectedReviewDate = dateKey();
@@ -1756,14 +1782,23 @@
       if (view === 'month') renderMonthReview();
     }
     function openWeeklyProgress(target) {
+      const focus = (selector) => {
+        window.setTimeout(() => {
+          const element = $(selector);
+          if (!element) return;
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          element.classList.add('progress-focus');
+          window.setTimeout(() => element.classList.remove('progress-focus'), 1400);
+        }, 80);
+      };
       if (target === 'reading') {
         activateView('review');
         activateReviewTab('week');
-        showToast('已打开周复盘，查看成长投入');
+        focus('#weekTimeline');
         return;
       }
       activateView('plan');
-      showToast(target === 'wedding' ? '已打开今日计划，查看婚礼事项' : '已打开今日计划，查看训练安排');
+      focus('#planList');
     }
     function calendarWeekDates() {
       const anchor = new Date();
