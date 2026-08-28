@@ -1572,9 +1572,9 @@
     }
     function renderSkinInputs(date) {
       const data = loadSkinCheck(date) || {};
-      skinDimensions.forEach(item => { const input = $(item.input); if (input) input.value = data[item.key] ?? 60; });
+      skinDimensions.forEach(item => { const input = $(item.input); if (input) input.value = data[item.key] ?? ''; });
       $('#skinSelectedDate').textContent = `记录 ${new Date(date).getMonth() + 1} 月 ${new Date(date).getDate()} 日 · 0-100 分，分数越高代表当前状态越稳定`;
-      skinDimensions.forEach(item => { const score = $(item.score); const input = $(item.input); if (score && input) score.textContent = input.value; });
+      skinDimensions.forEach(item => { const score = $(item.score); const input = $(item.input); if (score && input) score.textContent = input.value === '' ? '--' : input.value; });
     }
     function renderSkinRadar(values) {
       const radar = $('#skinRadar'); if (!radar) return;
@@ -1882,7 +1882,7 @@
     $('#weekReviewPrev').addEventListener('click', () => { const date = new Date(`${selectedReviewDate}T00:00:00`); date.setDate(date.getDate() - 7); selectedReviewDate = dateKey(date); renderWeekReview(); });
     $('#weekReviewNext').addEventListener('click', () => { const date = new Date(`${selectedReviewDate}T00:00:00`); date.setDate(date.getDate() + 7); selectedReviewDate = dateKey(date); renderWeekReview(); });
     $$('.skin-dimension input[type="number"]').forEach(input => input.addEventListener('input', () => { const value = Math.max(0, Math.min(100, Number(input.value) || 0)); input.value = value; const score = $(`#${input.id}Score`); if (score) score.textContent = value; renderSkinRadar(skinDimensions.map(item => Number($(item.input).value) || 0)); }));
-    $('#saveSkinCheck').addEventListener('click', () => { const values = Object.fromEntries(skinDimensions.map(item => [item.key, Number($(item.input).value)])); saveSkinCheck(selectedReviewDate, values); renderWeekReview(); showToast('今日皮肤状态已保存'); });
+    $('#saveSkinCheck').addEventListener('click', () => { const inputs = skinDimensions.map(item => $(item.input)); if (inputs.some(input => input.value === '')) { showToast('请填写 5 项，或今天先不记录'); return; } const values = Object.fromEntries(skinDimensions.map(item => [item.key, Number($(item.input).value)])); saveSkinCheck(selectedReviewDate, values); renderWeekReview(); showToast('今日皮肤状态已保存'); });
     $('#monthReviewPrev').addEventListener('click', () => { monthReviewOffset -= 1; renderMonthReview(); });
     $('#monthReviewNext').addEventListener('click', () => { monthReviewOffset += 1; renderMonthReview(); });
     $('#saveDayReview').addEventListener('click', () => { const review = saveReview('day', selectedReviewDate, { wins: $('#dayReviewWins').value.trim(), strength: $('#dayReviewStrength').value.trim(), improve: $('#dayReviewImprove').value.trim(), stuck: $('#dayReviewImprove').value.trim(), next: $('#dayReviewNext').value.trim() }); $('#dayReviewSaveState').textContent = `已保存 ${new Date(review.updatedAt).toLocaleDateString('zh-CN', { month: 'numeric', day: 'numeric' })}`; renderHistoryDate(); renderReviewTrace(weekDatesForAnchor(selectedReviewDate), '#weekDayTrace'); renderMonthReview(); showToast('今日行动复盘已保存'); });
