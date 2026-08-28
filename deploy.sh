@@ -75,11 +75,12 @@ wait_for_healthy() {
     done
 }
 
-log 'Pulling the latest image'
-docker compose pull app
+log 'Pulling the latest images'
+docker compose pull app db
 
-log 'Updating the app'
-docker compose up -d --pull never --no-deps --remove-orphans app
+log 'Updating the app and PostgreSQL'
+docker compose up -d --pull never --remove-orphans
+wait_for_healthy db
 wait_for_healthy app
 
 log 'Deployment completed'
