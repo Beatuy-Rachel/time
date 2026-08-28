@@ -772,8 +772,6 @@
           <div class="section-title"><h2>这一周，时间花在哪里？</h2><button class="soft-button" id="openCalendarFromReview"><i data-lucide="calendar-days" style="width:14px;height:14px"></i>查看日历</button></div>
           <div class="period-toolbar"><button class="period-nav" id="weekReviewPrev" type="button" aria-label="上一周"><i data-lucide="chevron-left"></i></button><h3 id="weekReviewRange">本周</h3><button class="period-nav" id="weekReviewNext" type="button" aria-label="下一周"><i data-lucide="chevron-right"></i></button></div>
           <div class="metric-grid"><div class="metric"><p>真实经过</p><strong id="weekRecorded">0m</strong><em id="weekRecordedHint">0 天有记录</em></div><div class="metric"><p>训练</p><strong id="weekTraining">0 次</strong><em id="weekTrainingHint">等待记录</em></div><div class="metric"><p>阅读</p><strong id="weekReading">0m</strong><em id="weekReadingHint">等待记录</em></div></div>
-          <div class="week-goals-head"><h3>本周目标进度</h3><span>来自时间记录</span></div>
-          <div class="week-goal-list" id="weekGoalList"></div>
           <div class="skin-tracker" aria-label="本周皮肤状态追踪">
             <div class="skin-tracker-head"><div><h3>本周皮肤状态</h3><p>每天花 30 秒记录，观察自己的变化趋势</p></div><strong id="skinWeekAverage">--</strong></div>
             <div class="skin-days" id="skinDays"></div>
@@ -789,15 +787,11 @@
             <div class="week-donut-wrap"><div class="week-donut" id="weekDonut" role="img" aria-label="本周活动投入分布"><div class="week-donut-center"><strong id="weekAllocationTotal">0m</strong><span>活动投入</span></div></div><p class="week-donut-caption" id="weekAllocationCaption">记录活动后，这里会显示时间占比。</p></div>
             <div class="week-category-list" id="weekCategoryList"></div>
           </div>
-          <div class="week-analysis-note" id="weekAnalysisNote" aria-live="polite"><i data-lucide="sparkles"></i><div><strong>从一段记录开始</strong><p>记录活动后，这里会分析你把时间花在了哪里。</p></div></div>
-          <div class="history-section-title"><h3>复盘觉察</h3><span>不只看数字，也听见自己</span></div>
+          <div class="history-section-title"><h3>本周觉察</h3><span>留下对下周有帮助的结论</span></div>
           <div class="week-observation-list">
             <div class="week-observation"><div class="week-observation-head"><span class="week-observation-icon green">●</span><label for="weekObserveWins">本周执行亮点</label></div><textarea id="weekObserveWins" placeholder="记录这周做得好的 3-5 件事，哪怕很小也值得被看见"></textarea></div>
             <div class="week-observation"><div class="week-observation-head"><span class="week-observation-icon yellow">●</span><label for="weekObserveStuck">本周卡点 / 小问题</label></div><textarea id="weekObserveStuck" placeholder="哪件事推进不顺利？原因是什么？需要什么支持？"></textarea></div>
-            <div class="week-observation"><div class="week-observation-head"><span class="week-observation-icon blue">●</span><label for="weekObserveBody">身体觉察</label></div><textarea id="weekObserveBody" placeholder="睡眠、饮食、运动、精力状态如何？身体在给你什么信号？"></textarea></div>
-            <div class="week-observation"><div class="week-observation-head"><span class="week-observation-icon coral">●</span><label for="weekObserveMoney">金钱觉察</label></div><textarea id="weekObserveMoney" placeholder="本周收支如何？有什么消费冲动或理财思考？"></textarea></div>
-            <div class="week-observation"><div class="week-observation-head"><span class="week-observation-icon purple">●</span><label for="weekObserveMood">情绪觉察</label></div><textarea id="weekObserveMood" placeholder="这周情绪状态如何？有什么触发情绪的事件？"></textarea></div>
-            <div class="week-observation"><div class="week-observation-head"><span class="week-observation-icon sage">●</span><label for="weekObserveSelf">自我觉察</label></div><textarea id="weekObserveSelf" placeholder="对自己的新发现？价值观或认知上有什么变化？"></textarea></div>
+            <div class="week-observation"><div class="week-observation-head"><span class="week-observation-icon blue">●</span><label for="weekObserveBody">身体与情绪</label></div><textarea id="weekObserveBody" placeholder="睡眠、饮食、运动和情绪状态如何？下周要照顾什么？"></textarea></div>
           </div>
           <div class="week-next-action"><div class="week-next-action-head"><h3>下周重点待办</h3><span class="eyebrow" style="margin:0">把觉察变成行动</span></div><div class="week-next-action-input"><input id="weekActionInput" maxlength="40" placeholder="待办内容..." aria-label="下周重点待办内容"><input id="weekActionDate" type="date" aria-label="待办日期"><select id="weekActionPriority" aria-label="待办优先级"><option>中</option><option>高</option><option>低</option></select><button id="addWeekAction" type="button"><i data-lucide="plus" style="width:13px;height:13px"></i>添加</button></div><div class="week-next-action-list" id="weekActionList"></div></div>
           <div class="review-template-footer"><small id="weekReviewSaveState">保存后保留本周觉察内容</small><button class="primary-button" id="saveWeekReview" type="button"><i data-lucide="save" style="width:14px;height:14px"></i>保存周复盘</button></div>
@@ -1456,8 +1450,8 @@
     }
     function renderWeekReviewTemplate(week, summaries) {
       const period = weekReviewPeriod(week[0]); const review = loadReview('week', period);
-      const fields = { wins: '#weekReviewWins', stuck: '#weekReviewStuck', lesson: '#weekReviewLesson', next: '#weekReviewNext', observeWins: '#weekObserveWins', observeStuck: '#weekObserveStuck', observeBody: '#weekObserveBody', observeMoney: '#weekObserveMoney', observeMood: '#weekObserveMood', observeSelf: '#weekObserveSelf' };
-      Object.entries(fields).forEach(([key, selector]) => { const field = $(selector); if (field && document.activeElement !== field) field.value = review[key] || ''; });
+      const fields = { observeWins: '#weekObserveWins', observeStuck: '#weekObserveStuck', observeBody: '#weekObserveBody' };
+      Object.entries(fields).forEach(([key, selector]) => { const field = $(selector); if (field && document.activeElement !== field) field.value = key === 'observeBody' ? (review.observeBody || review.observeMood || '') : (review[key] || ''); });
       $('#weekReviewSaveState').textContent = review.updatedAt ? `已保存 ${new Date(review.updatedAt).toLocaleDateString('zh-CN', { month: 'numeric', day: 'numeric' })}` : '未填写';
       renderWeekActions(review.actions);
       renderReviewTrace(week, '#weekDayTrace');
@@ -1592,22 +1586,6 @@
       renderSkinInputs(selectedReviewDate);
       renderSkinRadar(skinDimensions.map(item => summary.averages[item.key]));
     }
-    function renderWeekGoals(weekActivities, summaries) {
-      const container = $('#weekGoalList');
-      if (!container) return;
-      const goals = [
-        { name: '阅读投入', target: 180, value: weekActivities.filter(item => /阅读/.test(item.name)).reduce((sum, item) => sum + item.minutes, 0), unit: '分钟' },
-        { name: '学习投入', target: 180, value: weekActivities.filter(item => /学习|练字/.test(item.name)).reduce((sum, item) => sum + item.minutes, 0), unit: '分钟' },
-        { name: '身体活动', target: 120, value: weekActivities.filter(item => /健身|打球|瑜伽|训练|体态/.test(item.name)).reduce((sum, item) => sum + item.minutes, 0), unit: '分钟' },
-        { name: '留下记录', target: 5, value: summaries.filter(item => item.summary.activities.length > 0).length, unit: '天' }
-      ];
-      container.innerHTML = goals.map((goal, index) => {
-        const percent = Math.min(100, Math.round(goal.value / goal.target * 100));
-        const value = goal.unit === '分钟' ? formatMinutes(goal.value) : `${goal.value} ${goal.unit}`;
-        const target = goal.unit === '分钟' ? formatMinutes(goal.target) : `${goal.target} ${goal.unit}`;
-        return `<div class="week-goal-row"><span class="week-goal-index">${index + 1}</span><div class="week-goal-copy"><strong>${goal.name}</strong><small>${value} / ${target}</small><div class="week-goal-track"><div class="week-goal-fill" style="width:${percent}%"></div></div></div><span class="week-goal-progress${percent >= 100 ? ' done' : ''}">${percent}%</span></div>`;
-      }).join('');
-    }
     function renderWeekReview() {
       const anchor = new Date(`${selectedReviewDate || dateKey()}T00:00:00`);
       const monday = new Date(anchor); const day = monday.getDay(); monday.setDate(monday.getDate() + (day === 0 ? -6 : 1 - day));
@@ -1626,7 +1604,6 @@
       $('#weekTrainingHint').textContent = trainingMinutes ? `${formatMinutes(trainingMinutes)} 投入` : '等待记录';
       $('#weekReading').textContent = formatMinutes(readingMinutes);
       $('#weekReadingHint').textContent = readingMinutes ? '阅读投入' : '等待记录';
-      renderWeekGoals(weekActivities, summaries);
       renderWeekSkin(week);
       renderWeekTimeline(summaries);
       const categoryTotals = Object.keys(weekCategoryMeta).map(category => ({ category, minutes: weekActivities.filter(activity => activity.category === category).reduce((sum, activity) => sum + activity.minutes, 0), ...weekCategoryMeta[category] })).sort((a, b) => b.minutes - a.minutes);
@@ -1638,9 +1615,6 @@
       $('#weekAllocationRange').textContent = `${week[0].getMonth() + 1}月${week[0].getDate()}日 - ${week[6].getMonth() + 1}月${week[6].getDate()}日`;
       $('#weekAllocationCaption').textContent = activityMinutes ? `最多投入在${topCategory.category} · 点击类别查看明细` : '记录活动后，这里会显示时间占比。';
       $('#weekCategoryList').innerHTML = categoryTotals.map(item => { const share = activityMinutes ? Math.round(item.minutes / activityMinutes * 100) : 0; const pressed = weekCategoryFilter === item.category; return `<button class="week-category-button" type="button" data-week-filter="${item.category}" aria-pressed="${pressed}"><span class="week-category-swatch" style="background:${item.color}"></span><span class="week-category-copy"><span class="week-category-name">${item.category}</span><span class="week-category-meta"><span class="week-category-track"><span class="week-category-fill" style="width:${share}%;background:${item.color}"></span></span><span class="week-category-value">${formatMinutes(item.minutes)}</span></span></span><span class="week-category-share">${share}%</span></button>`; }).join('');
-      const analysisTitle = activityMinutes ? (topCategory.minutes / activityMinutes >= .5 ? `${topCategory.category} 是本周主要投入` : `本周投入主要分布在${topCategory.category}和其他活动`) : '从一段记录开始';
-      const analysisCopy = activityMinutes ? `按活动记录时长统计，${topCategory.category}占 ${Math.round(topCategory.minutes / activityMinutes * 100)}%（${formatMinutes(topCategory.minutes)}）。顶部“真实经过”会把重叠时段去重，分布图则保留每段活动的投入。` : '记录活动后，这里会分析你把时间花在了哪里。';
-      $('#weekAnalysisNote').innerHTML = `<i data-lucide="${activityMinutes ? 'sparkles' : 'circle-plus'}"></i><div><strong>${analysisTitle}</strong><p>${analysisCopy}</p></div>`;
       $$('[data-week-date]').forEach(button => button.addEventListener('click', () => { selectedReviewDate = button.dataset.weekDate; renderHistoryDate(); activateReviewTab('day'); }));
       renderWeekReviewTemplate(week, summaries);
       lucide.createIcons({ attrs: { width: 16, height: 16, 'stroke-width': 1.8 } });
@@ -1906,7 +1880,7 @@
     $('#monthReviewPrev').addEventListener('click', () => { monthReviewOffset -= 1; renderMonthReview(); });
     $('#monthReviewNext').addEventListener('click', () => { monthReviewOffset += 1; renderMonthReview(); });
     $('#saveDayReview').addEventListener('click', () => { const review = saveReview('day', selectedReviewDate, { wins: $('#dayReviewWins').value.trim(), strength: $('#dayReviewStrength').value.trim(), improve: $('#dayReviewImprove').value.trim(), stuck: $('#dayReviewImprove').value.trim(), next: $('#dayReviewNext').value.trim() }); $('#dayReviewSaveState').textContent = `已保存 ${new Date(review.updatedAt).toLocaleDateString('zh-CN', { month: 'numeric', day: 'numeric' })}`; renderHistoryDate(); renderReviewTrace(weekDatesForAnchor(selectedReviewDate), '#weekDayTrace'); renderMonthReview(); showToast('今日行动复盘已保存'); });
-    $('#saveWeekReview').addEventListener('click', () => { const period = weekReviewPeriod(selectedReviewDate); const previous = loadReview('week', period); const review = saveReview('week', period, { observeWins: $('#weekObserveWins').value.trim(), observeStuck: $('#weekObserveStuck').value.trim(), observeBody: $('#weekObserveBody').value.trim(), observeMoney: $('#weekObserveMoney').value.trim(), observeMood: $('#weekObserveMood').value.trim(), observeSelf: $('#weekObserveSelf').value.trim(), actions: previous.actions || [] }); $('#weekReviewSaveState').textContent = `已保存 ${new Date(review.updatedAt).toLocaleDateString('zh-CN', { month: 'numeric', day: 'numeric' })}`; renderReviewTrace(weekDatesForAnchor(selectedReviewDate), '#weekDayTrace'); renderMonthReview(); showToast('本周复盘已保存'); });
+    $('#saveWeekReview').addEventListener('click', () => { const period = weekReviewPeriod(selectedReviewDate); const previous = loadReview('week', period); const review = saveReview('week', period, { observeWins: $('#weekObserveWins').value.trim(), observeStuck: $('#weekObserveStuck').value.trim(), observeBody: $('#weekObserveBody').value.trim(), observeMoney: '', observeMood: '', observeSelf: '', actions: previous.actions || [] }); $('#weekReviewSaveState').textContent = `已保存 ${new Date(review.updatedAt).toLocaleDateString('zh-CN', { month: 'numeric', day: 'numeric' })}`; renderReviewTrace(weekDatesForAnchor(selectedReviewDate), '#weekDayTrace'); renderMonthReview(); showToast('本周复盘已保存'); });
     $('#addWeekAction').addEventListener('click', () => { const input = $('#weekActionInput'); const text = input.value.trim(); if (!text) { showToast('先写下一个下周待办'); return; } const period = weekReviewPeriod(selectedReviewDate); const review = loadReview('week', period); review.actions.push({ id: `week-action-${Date.now()}`, text, date: $('#weekActionDate').value, priority: $('#weekActionPriority').value, done: false }); saveReview('week', period, review); input.value = ''; renderWeekActions(review.actions); showToast('已加入下周待办'); });
     $('#saveMonthReview').addEventListener('click', () => { const period = monthReviewPeriod(monthReviewDate()); const actionsByArea = Object.fromEntries($$('#monthActionGrid [data-month-action]').map(field => [field.dataset.monthAction, field.value.trim()])); const review = saveReview('month', period, { wins: $('#monthReviewWins').value.trim(), pattern: $('#monthReviewPattern').value.trim(), adjust: $('#monthReviewAdjust').value.trim(), memo: $('#monthReviewMemo').value.trim(), actionsByArea }); renderMonthReview(); showToast('本月复盘已保存'); });
     $('#weekCategoryList').addEventListener('click', event => { const button = event.target.closest('[data-week-filter]'); if (!button) return; weekCategoryFilter = button.dataset.weekFilter; renderWeekReview(); });
