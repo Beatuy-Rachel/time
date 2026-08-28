@@ -94,6 +94,8 @@
     .location-button:hover { color: var(--sage-dark); }
     .location-button.is-loading { cursor: wait; }
     .mood-chip { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--sage-dark); background: var(--sage-pale); padding: 6px 10px; border-radius: 20px; }
+    .day-actions { display: flex; align-items: center; gap: 10px; }
+    .quick-capture { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
     .summary-strip { margin-top: 20px; background: var(--surface); border: 1px solid var(--line); padding: 14px 16px; border-radius: 8px; }
     .summary-strip-head { display: flex; align-items: baseline; justify-content: space-between; }
     .summary-strip strong { font-size: 25px; font-weight: 500; }
@@ -651,7 +653,7 @@
         <h2 class="hero-title" id="today-title">早安，<span>今天也慢慢来。</span></h2>
         <div class="day-row">
           <button class="location-button is-loading" id="locationButton" type="button" aria-live="polite" aria-label="获取当前位置与天气"><i data-lucide="locate-fixed" style="width:14px;height:14px"></i><span id="locationWeather">正在获取位置与天气…</span></button>
-          <div class="mood-chip"><i data-lucide="leaf" style="width:13px;height:13px"></i> 今日状态 · 平稳</div>
+          <div class="day-actions"><div class="mood-chip"><i data-lucide="leaf" style="width:13px;height:13px"></i> 今日状态 · 平稳</div><button class="text-button quick-capture" id="quickCapture" type="button"><i data-lucide="pen-line" style="width:13px;height:13px"></i>30 秒记录</button></div>
         </div>
 
         <div class="summary-strip">
@@ -854,7 +856,7 @@
   </div>
 
   <div class="modal-layer" id="summaryModal" role="dialog" aria-modal="true" aria-labelledby="summaryTitle">
-    <div class="modal"><div class="modal-head"><h2 id="summaryTitle">说说今天</h2><button class="close-button close-modal" aria-label="关闭"><i data-lucide="x"></i></button></div><div class="voice-box"><button class="voice-button" id="voiceButton" aria-label="开始语音输入"><i data-lucide="mic"></i></button><div class="voice-copy"><strong id="voiceStatus">点击开始说话</strong><p>可以说说今天的状态、完成的事和卡住的地方</p></div></div><div class="form-field" style="margin-top:13px"><label for="summaryText">也可以直接写下来</label><textarea id="summaryText" placeholder="例如：今天有点累，但完成了训练和两顿高蛋白……"></textarea></div><div class="ai-output" id="aiOutput"><h3>AI 已帮你理清今天</h3><p><strong>完成与亮点：</strong>你完成了早间护肤、体态激活，并把通勤时间转化成了阅读时间。</p><p><strong>状态观察：</strong>下午能量可能有所下降，今晚适合从轻量训练开始，不必追求一次做到满分。</p><p><strong>明日一件重要的事：</strong>确认婚礼场地方案，预留 25 分钟完成第一步。</p></div><div class="modal-footer"><button class="soft-button close-modal">稍后再说</button><button class="soft-button" id="saveFeeling">保存感受</button><button class="primary-button" id="generateAi"><i data-lucide="sparkles" style="width:14px;height:14px"></i>保存并生成</button></div></div>
+    <div class="modal"><div class="modal-head"><h2 id="summaryTitle">30 秒记录今天</h2><button class="close-button close-modal" aria-label="关闭"><i data-lucide="x"></i></button></div><div class="voice-box"><button class="voice-button" id="voiceButton" aria-label="开始语音输入"><i data-lucide="mic"></i></button><div class="voice-copy"><strong id="voiceStatus">说一句今天的想法</strong><p>累的时候只写一句也可以，之后还能在日复盘里回看</p></div></div><div class="form-field" style="margin-top:13px"><label for="summaryText">今天想留下什么</label><textarea id="summaryText" placeholder="例如：今天有点累，但完成了一件重要的事……"></textarea></div><div class="ai-output" id="aiOutput"><h3>AI 已帮你理清今天</h3><p><strong>完成与亮点：</strong>你完成了早间护肤、体态激活，并把通勤时间转化成了阅读时间。</p><p><strong>状态观察：</strong>下午能量可能有所下降，今晚适合从轻量训练开始，不必追求一次做到满分。</p><p><strong>明日一件重要的事：</strong>确认婚礼场地方案，预留 25 分钟完成第一步。</p></div><div class="modal-footer"><button class="soft-button close-modal">稍后再说</button><button class="primary-button" id="saveFeeling">保存今天</button><button class="soft-button" id="generateAi"><i data-lucide="sparkles" style="width:14px;height:14px"></i>整理一下</button></div></div>
   </div>
 
   <div class="modal-layer" id="mealModal" role="dialog" aria-modal="true" aria-labelledby="mealTitle">
@@ -1889,6 +1891,7 @@
     $('#openManual').addEventListener('click', () => openModal('manualModal'));
     $('#openManualTop').addEventListener('click', () => openModal('manualModal'));
     $('#openSummary').addEventListener('click', openDailyFeelingEditor);
+    $('#quickCapture').addEventListener('click', openDailyFeelingEditor);
     $('#editFeeling').addEventListener('click', openDailyFeelingEditor);
     $('#openMeal').addEventListener('click', () => openMealEditor());
     $('#nextRecipeSet').addEventListener('click', () => { recipeSetIndex = (recipeSetIndex + 1) % recipeSets.length; renderRecipeSet(); showToast('已换一批晚餐菜谱'); });
