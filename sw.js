@@ -1,4 +1,4 @@
-const CACHE_NAME = 'shiguang-shell-v5';
+const CACHE_NAME = 'shiguang-shell-v6';
 const APP_SHELL = ['./', './index.html', './manifest.json', './icon.svg'];
 
 self.addEventListener('install', event => {

@@ -134,6 +134,8 @@
     .timeline-scale { display: flex; justify-content: space-between; color: var(--muted); font-size: 10px; padding-left: 56px; margin-bottom: 8px; }
     .timeline-row { min-height: 34px; display: grid; grid-template-columns: 48px 1fr; gap: 8px; align-items: center; position: relative; }
     .timeline-sample[hidden] { display: none; }
+    .timeline-sample { display: none; }
+    .timeline-empty { padding: 16px 4px 8px; color: var(--muted); font-size: 11px; text-align: center; }
     .timeline-row + .timeline-row { border-top: 1px dashed #edf0eb; }
     .timeline-time { font-family: "DM Sans", sans-serif; font-size: 10px; color: var(--muted); }
     .timeline-lane { min-height: 21px; position: relative; }
@@ -608,6 +610,11 @@
     .form-field label { font-size: 11px; color: var(--muted); }
     .form-field input, .form-field textarea, .form-field select { width: 100%; background: var(--surface); border: 1px solid var(--line); border-radius: 7px; padding: 10px 11px; color: var(--ink); }
     .form-field textarea { min-height: 90px; resize: vertical; line-height: 1.6; }
+    .meal-quick-label { color: var(--muted); font-size: 10px; margin: 4px 0 0; }
+    .meal-quick-options { display: flex; flex-wrap: wrap; gap: 6px; }
+    .meal-quick-option { border: 1px solid var(--line); border-radius: 15px; background: var(--surface); color: var(--ink); padding: 6px 10px; font-size: 11px; cursor: pointer; }
+    .meal-quick-option:hover, .meal-quick-option.is-selected { border-color: var(--sage); background: var(--sage-pale); color: var(--sage-dark); }
+    .form-hint { display: block; color: var(--muted); font-size: 10px; line-height: 1.5; }
     .file-input { width: 100%; color: var(--muted); font-size: 11px; }
     .file-input::file-selector-button { border: 1px solid var(--line); border-radius: 7px; background: var(--surface); color: var(--ink); padding: 8px 10px; margin-right: 8px; cursor: pointer; }
     .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
@@ -672,26 +679,17 @@
         <div class="section-title"><h2>今天的时间线</h2><button class="text-button" id="jumpReview">查看分析 →</button></div>
         <div class="timeline" aria-label="今日时间线">
           <div class="timeline-scale"><span>06:00</span><span>10:00</span><span>14:00</span><span>18:00</span><span>22:00</span></div>
-          <div class="timeline-sample" id="timelineSample">
-            <div class="timeline-row"><span class="timeline-time">06:40</span><div class="timeline-lane"><div class="time-block yellow">晨间准备</div></div></div>
-            <div class="timeline-row"><span class="timeline-time">07:52</span><div class="timeline-lane"><div class="time-block sage">通勤</div><div class="time-block blue">阅读</div></div></div>
-            <div class="timeline-row"><span class="timeline-time">09:00</span><div class="timeline-lane"><div class="time-block coral">工作 · 会议</div></div></div>
-            <div class="timeline-row"><span class="timeline-time">12:20</span><div class="timeline-lane"><div class="time-block sage">午餐 + 散步</div></div></div>
-          </div>
+          <div class="timeline-sample" id="timelineSample" hidden></div>
           <div class="timeline-records" id="timelineRecords" aria-live="polite"></div>
           <div class="timeline-legend"><span class="legend-item"><i class="legend-dot dot-sage"></i>生活</span><span class="legend-item"><i class="legend-dot dot-blue"></i>成长</span><span class="legend-item"><i class="legend-dot dot-coral"></i>工作</span><span class="legend-item"><i class="legend-dot dot-yellow"></i>自我照顾</span></div>
         </div>
 
-        <div class="section-title"><h2>今天想照顾的自己</h2><span class="eyebrow" style="margin:0">4 / 6 已完成</span></div>
-        <div class="habit-list">
-          <div class="habit-empty">今天还没有习惯记录。</div>
-        </div>
       </section>
 
       <section class="view" id="view-plan" aria-labelledby="plan-title">
         <p class="eyebrow">计划与节奏</p><h2 class="hero-title" id="plan-title">给重要的事，留一点位置。</h2>
         <div class="section-title"><h2>今天的主题</h2><button class="text-button" id="editPlan">编辑计划 →</button></div>
-        <div class="theme-day-card"><div class="theme-icon"><i data-lucide="heart-pulse"></i></div><div><h3 id="themeDayName">周四 · 温柔修复日</h3><p id="themeDayDescription">忙碌中留一点空间给身体：完成体态舒展、轻量训练和晚间放松。</p></div><button class="theme-edit" id="editTheme">更换</button></div>
+        <div class="theme-day-card"><div class="theme-icon"><i data-lucide="heart-pulse"></i></div><div><h3 id="themeDayName">今天的主题</h3><p id="themeDayDescription">给今天设一个方向，也可以暂时不设。</p></div><button class="theme-edit" id="editTheme">设置</button></div>
         <div class="section-title"><h2>今天必做（可选）</h2><span class="eyebrow" id="mustDoCount" style="margin:0">0 / 0 已完成</span></div>
         <div class="must-do-list" id="mustDoList">
           <div class="must-empty">还没有安排今天必做的事。</div>
@@ -849,15 +847,15 @@
   </div>
 
   <div class="modal-layer" id="manualModal" role="dialog" aria-modal="true" aria-labelledby="manualTitle">
-    <div class="modal"><div class="modal-head"><h2 id="manualTitle">手动补录一段时间</h2><button class="close-button close-modal" aria-label="关闭"><i data-lucide="x"></i></button></div><div class="form-stack"><div class="form-field"><label for="manualActivity">我在做什么</label><input id="manualActivity" value="学习" placeholder="例如：整理照片"></div><div class="two-col"><div class="form-field"><label for="manualStart">开始时间</label><input id="manualStart" type="time" value="14:00"></div><div class="form-field"><label for="manualEnd">结束时间</label><input id="manualEnd" type="time" value="15:30"></div></div><div class="form-field"><label for="manualCategory">分类</label><select id="manualCategory"><option>成长</option><option>工作</option><option>生活</option><option>自我照顾</option></select></div><div class="form-field"><label for="manualNote">备注（可选）</label><textarea id="manualNote" placeholder="这段时间有什么值得记下来的？"></textarea></div></div><div class="modal-footer"><button class="soft-button close-modal">取消</button><button class="primary-button" id="saveManual">保存记录</button></div></div>
+    <div class="modal"><div class="modal-head"><h2 id="manualTitle">手动补录一段时间</h2><button class="close-button close-modal" aria-label="关闭"><i data-lucide="x"></i></button></div><div class="form-stack"><div class="form-field"><label for="manualActivity">我在做什么</label><input id="manualActivity" placeholder="例如：整理照片"></div><div class="two-col"><div class="form-field"><label for="manualStart">开始时间</label><input id="manualStart" type="time"></div><div class="form-field"><label for="manualEnd">结束时间</label><input id="manualEnd" type="time"></div></div><span class="form-hint">结束时间早于开始时间时，会按跨午夜记录；每段最多 24 小时。</span><div class="form-field"><label for="manualCategory">分类</label><select id="manualCategory"><option>成长</option><option>工作</option><option>生活</option><option>自我照顾</option></select></div><div class="form-field"><label for="manualNote">备注（可选）</label><textarea id="manualNote" placeholder="这段时间有什么值得记下来的？"></textarea></div></div><div class="modal-footer"><button class="soft-button close-modal">取消</button><button class="primary-button" id="saveManual">保存记录</button></div></div>
   </div>
 
   <div class="modal-layer" id="summaryModal" role="dialog" aria-modal="true" aria-labelledby="summaryTitle">
-    <div class="modal"><div class="modal-head"><h2 id="summaryTitle">30 秒记录今天</h2><button class="close-button close-modal" aria-label="关闭"><i data-lucide="x"></i></button></div><div class="voice-box"><button class="voice-button" id="voiceButton" aria-label="开始语音输入"><i data-lucide="mic"></i></button><div class="voice-copy"><strong id="voiceStatus">说一句今天的想法</strong><p>累的时候只写一句也可以，之后还能在日复盘里回看</p></div></div><div class="form-field" style="margin-top:13px"><label for="summaryText">今天想留下什么</label><textarea id="summaryText" placeholder="例如：今天有点累，但完成了一件重要的事……"></textarea></div><div class="ai-output" id="aiOutput"><h3>AI 已帮你理清今天</h3><p><strong>完成与亮点：</strong>你完成了早间护肤、体态激活，并把通勤时间转化成了阅读时间。</p><p><strong>状态观察：</strong>下午能量可能有所下降，今晚适合从轻量训练开始，不必追求一次做到满分。</p><p><strong>明日一件重要的事：</strong>确认婚礼场地方案，预留 25 分钟完成第一步。</p></div><div class="modal-footer"><button class="soft-button close-modal">稍后再说</button><button class="primary-button" id="saveFeeling">保存今天</button><button class="soft-button" id="generateAi"><i data-lucide="sparkles" style="width:14px;height:14px"></i>整理一下</button></div></div>
+    <div class="modal"><div class="modal-head"><h2 id="summaryTitle">30 秒记录今天</h2><button class="close-button close-modal" aria-label="关闭"><i data-lucide="x"></i></button></div><div class="voice-box"><button class="voice-button" id="voiceButton" aria-label="开始语音输入"><i data-lucide="mic"></i></button><div class="voice-copy"><strong id="voiceStatus">说一句今天的想法</strong><p>累的时候只写一句也可以，之后还能在日复盘里回看</p></div></div><div class="form-field" style="margin-top:13px"><label for="summaryText">今天想留下什么</label><textarea id="summaryText" placeholder="例如：今天有点累，但完成了一件重要的事……"></textarea></div><div class="ai-output" id="aiOutput"><h3>今天的记录</h3><p id="aiOutputText"></p></div><div class="modal-footer"><button class="soft-button close-modal">稍后再说</button><button class="primary-button" id="saveFeeling">保存今天</button><button class="soft-button" id="generateAi"><i data-lucide="sparkles" style="width:14px;height:14px"></i>整理一下</button></div></div>
   </div>
 
   <div class="modal-layer" id="mealModal" role="dialog" aria-modal="true" aria-labelledby="mealTitle">
-    <div class="modal"><div class="modal-head"><h2 id="mealTitle">记录一餐</h2><button class="close-button close-modal" aria-label="关闭"><i data-lucide="x"></i></button></div><div class="form-stack"><div class="form-field"><label for="mealType">餐次</label><select id="mealType"><option>晚餐</option><option>早餐</option><option>午餐</option><option>饮品 / 零食</option></select></div><div class="form-field"><label for="mealContent">吃了什么 / 喝了什么</label><input id="mealContent" placeholder="例如：虾仁豆腐蔬菜汤"></div><div class="form-field"><label for="mealFeel">吃完的感受</label><select id="mealFeel"><option>刚刚好</option><option>有点撑</option><option>还不够饱</option><option>随手记录</option></select></div></div><div class="modal-footer"><button class="soft-button close-modal">取消</button><button class="primary-button" id="saveMeal">保存饮食</button></div></div>
+    <div class="modal"><div class="modal-head"><h2 id="mealTitle">记录一餐</h2><button class="close-button close-modal" aria-label="关闭"><i data-lucide="x"></i></button></div><div class="form-stack"><div class="form-field"><label for="mealType">餐次</label><select id="mealType"><option>晚餐</option><option>早餐</option><option>午餐</option><option>饮品 / 零食</option></select></div><div class="form-field"><label for="mealContent">吃了什么 / 喝了什么</label><input id="mealContent" placeholder="例如：虾仁豆腐蔬菜汤"><p class="meal-quick-label">快速选择，之后仍可修改</p><div class="meal-quick-options" id="mealQuickOptions"><button class="meal-quick-option" type="button" data-meal-quick="外卖">外卖</button><button class="meal-quick-option" type="button" data-meal-quick="家常菜">家常菜</button><button class="meal-quick-option" type="button" data-meal-quick="没吃">没吃</button><button class="meal-quick-option" type="button" data-meal-quick="随便吃了">随便吃了</button><button class="meal-quick-option" type="button" data-meal-quick="加班餐">加班餐</button></div></div><div class="form-field"><label for="mealFeel">吃完的感受</label><select id="mealFeel"><option>刚刚好</option><option>有点撑</option><option>还不够饱</option><option>随手记录</option></select></div></div><div class="modal-footer"><button class="soft-button close-modal">取消</button><button class="primary-button" id="saveMeal">保存饮食</button></div></div>
   </div>
 
   <div class="modal-layer" id="themeModal" role="dialog" aria-modal="true" aria-labelledby="themeModalTitle">
@@ -866,7 +864,7 @@
       <div class="form-stack">
         <div class="form-field"><label for="themeSelect">今天的主题日</label><select id="themeSelect"><option value="力量启动日">力量启动日 · 健身 + 蛋白质 + 早睡</option><option value="专注成长日">专注成长日 · 阅读 + 练字 + 少刷手机</option><option value="活力球场日">活力球场日 · 打球 + 拉伸 + 补水</option><option value="温柔修复日" selected>温柔修复日 · 瑜伽 + 放松 + 轻量计划</option><option value="生活补给日">生活补给日 · 买菜 + 做饭 + 整理</option><option value="婚礼推进日">婚礼推进日 · 一个关键事项 + 生活照顾</option><option value="整理复盘日">整理复盘日 · 收纳 + 周计划 + 休息</option><option value="__custom__">自定义主题日…</option></select></div>
         <div class="form-field" id="customThemeFields" hidden><label for="customThemeName">自定义主题名称</label><input id="customThemeName" maxlength="18" placeholder="例如：轻松收尾日"><label for="customThemeDescription">今天想怎么过</label><input id="customThemeDescription" maxlength="58" placeholder="例如：整理房间、吃好晚餐、早点休息"></div>
-        <div class="form-field"><label>每天必做 3 件事</label><input id="mustDoInput1" value="好好吃一顿晚餐" maxlength="22"><input id="mustDoInput2" value="体态舒展" maxlength="22"><input id="mustDoInput3" value="确认婚礼场地方案" maxlength="22"></div>
+        <div class="form-field"><label>今天必做（最多 3 件，可选）</label><input id="mustDoInput1" maxlength="22" placeholder="例如：完成一件最重要的事"><input id="mustDoInput2" maxlength="22" placeholder="可留空"><input id="mustDoInput3" maxlength="22" placeholder="可留空"></div>
       </div>
       <div class="modal-footer"><button class="soft-button close-modal">取消</button><button class="primary-button" id="saveTheme">保存今天的计划</button></div>
     </div>
@@ -1196,11 +1194,14 @@
       const [hour, minute] = String(value || '').split(':').map(Number);
       return Number.isFinite(hour) && Number.isFinite(minute) ? hour * 60 + minute : 0;
     }
+    function isValidTime(value) {
+      return /^([01]\d|2[0-3]):[0-5]\d$/.test(String(value || ''));
+    }
     function durationBetweenTimes(start, end) {
+      if (!isValidTime(start) || !isValidTime(end)) return 0;
       const from = minutesFromTime(start); let to = minutesFromTime(end);
       if (to < from) to += 24 * 60;
-      if (to === from) return 1;
-      return Math.max(1, to - from);
+      return to === from ? 0 : to - from;
     }
     function activityCategory(name) {
       const value = String(name || '');
@@ -1220,7 +1221,7 @@
       let end = Number.isFinite(Number(activity.endMinute)) ? Number(activity.endMinute) : start + (Number(activity.durationMinutes) || 0);
       if (end < start) end += 24 * 60;
       if (end === start) end = start + Math.max(1, Number(activity.durationMinutes) || 0);
-      return [Math.max(0, Math.min(24 * 60, start)), Math.max(0, Math.min(24 * 60, end))];
+      return [Math.max(0, Math.min(24 * 60, start)), Math.max(0, Math.min(48 * 60, end))];
     }
     function activityDurationMinutes(activity) {
       const [start, end] = activityInterval(activity);
@@ -1291,19 +1292,22 @@
       if (!container) return;
       const summary = buildDaySummary(dateKey());
       if (sample) sample.hidden = Boolean(summary.activities.length);
-      container.innerHTML = summary.activities.map(activity => {
+      container.innerHTML = summary.activities.length ? summary.activities.map(activity => {
         const category = normalizeHistoryCategory(activity.category, activity.name);
         const name = activity.name || '未命名活动';
         return `<div class="timeline-entry"><span class="timeline-time">${escapeHtml(activity.start || '--:--')}</span><div class="timeline-lane"><div class="time-block ${categoryClass(category)}" style="${timelineBlockStyle(activity)}" title="${escapeHtml(name)} · ${formatMinutes(activityDurationMinutes(activity))}">${escapeHtml(name)}</div></div><button class="timeline-delete" type="button" data-delete-activity="${escapeHtml(activity.id)}" data-activity-date="${dateKey()}" aria-label="删除${escapeHtml(name)}" title="删除记录"><i data-lucide="trash-2"></i></button></div>`;
-      }).join('');
+      }).join('') : '<div class="timeline-empty">今天还没有时间记录，从一段活动开始。</div>';
       bindActivityDeleteButtons(container);
       lucide.createIcons({ attrs: { width: 16, height: 16, 'stroke-width': 1.8 } });
     }
     function addActivityRecord({ date = dateKey(), name, category, start, end, durationMinutes, note = '' }) {
       const record = loadDayRecord(date);
-      record.activities.push({ id: `activity-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`, name, category: normalizeHistoryCategory(category, name), start, end, startMinute: minutesFromTime(start), endMinute: minutesFromTime(end), durationMinutes, note });
+      const safeDuration = Number(durationMinutes) || durationBetweenTimes(start, end);
+      if (!name || !isValidTime(start) || !isValidTime(end) || safeDuration <= 0 || safeDuration > 24 * 60) return false;
+      record.activities.push({ id: `activity-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`, name: String(name).trim(), category: normalizeHistoryCategory(category, name), start, end, startMinute: minutesFromTime(start), endMinute: minutesFromTime(start) + safeDuration, durationMinutes: safeDuration, note });
       saveDayRecord(date, record);
       refreshSavedRecordViews(date);
+      return true;
     }
     function syncTodayPlanSnapshot() {
       const taskItems = $$('#planList .plan-item'); const mustItems = $$('#mustDoList .must-check');
@@ -1661,6 +1665,7 @@
       $('#mealType').value = type;
       $('#mealContent').value = item?.dataset.mealContent || presetContent || '';
       $('#mealFeel').value = item ? item.dataset.mealFeel : '刚刚好';
+      $$('#mealQuickOptions [data-meal-quick]').forEach(button => button.classList.toggle('is-selected', button.dataset.mealQuick === $('#mealContent').value));
       openModal('mealModal');
     }
     function bindMealItem(item) {
@@ -1966,7 +1971,7 @@
       $('.stop-activity', card).addEventListener('click', () => {
         const name = card.dataset.activity; const duration = elapsedFrom(card.dataset.start); const startedAt = new Date(card.dataset.start); const endedAt = new Date();
         const toTime = value => `${String(value.getHours()).padStart(2, '0')}:${String(value.getMinutes()).padStart(2, '0')}`;
-        addActivityRecord({ name, category: card.dataset.category || activityCategory(name), start: toTime(startedAt), end: toTime(endedAt), durationMinutes: Math.max(1, Math.floor(duration / 60)) });
+        addActivityRecord({ date: dateKey(startedAt), name, category: card.dataset.category || activityCategory(name), start: toTime(startedAt), end: toTime(endedAt), durationMinutes: Math.max(1, Math.floor(duration / 60)) });
         card.remove();
         showToast(`已结束「${name}」 · 这段时间被好好记下了`);
       });
@@ -1974,9 +1979,11 @@
     $$('.active-card').forEach(bindStop);
 
     $('#saveManual').addEventListener('click', () => {
-      const name = $('#manualActivity').value.trim() || '未命名活动'; const start = $('#manualStart').value; const end = $('#manualEnd').value; const category = $('#manualCategory').value; const note = $('#manualNote').value.trim();
-      if (!start || !end || end <= start) { showToast('请检查开始和结束时间'); return; }
-      addActivityRecord({ name, category, start, end, durationMinutes: durationBetweenTimes(start, end), note }); $('#manualNote').value = ''; closeModals(); showToast(`已补录「${name}」 ${start} - ${end}`);
+      const name = $('#manualActivity').value.trim(); const start = $('#manualStart').value; const end = $('#manualEnd').value; const category = $('#manualCategory').value; const note = $('#manualNote').value.trim();
+      const duration = durationBetweenTimes(start, end);
+      if (!name || !isValidTime(start) || !isValidTime(end) || duration <= 0 || duration > 24 * 60) { showToast('请填写活动名称，并检查时间范围（最多 24 小时）'); return; }
+      if (!addActivityRecord({ name, category, start, end, durationMinutes: duration, note })) { showToast('这段时间无法保存，请重新检查'); return; }
+      $('#manualActivity').value = ''; $('#manualNote').value = ''; closeModals(); showToast(`已补录「${name}」 ${start} - ${end}`);
     });
 
     $('#voiceButton').addEventListener('click', () => {
@@ -1984,9 +1991,11 @@
       else startSpeechRecognition();
     });
     $('#saveFeeling').addEventListener('click', () => { saveDailyFeeling(); });
-    $('#generateAi').addEventListener('click', () => { if (!saveDailyFeeling(false)) return; $('#aiOutput').classList.add('show'); $('#generateAi').innerHTML = '<i data-lucide="check" style="width:14px;height:14px"></i>已保存并生成'; lucide.createIcons({ attrs: { width: 16, height: 16, 'stroke-width': 1.8 } }); showToast('感受已保存，复盘已整理好'); });
+    $('#generateAi').addEventListener('click', () => { if (!saveDailyFeeling(false)) return; const summary = buildDaySummary(dateKey()); const feeling = $('#summaryText').value.trim(); $('#aiOutputText').textContent = `${feeling} ${summary.activities.length ? `今天记录了 ${summary.activities.length} 段活动，共 ${formatMinutes(summary.actualMinutes)}。` : '今天还没有时间记录。'}`; $('#aiOutput').classList.add('show'); $('#generateAi').innerHTML = '<i data-lucide="check" style="width:14px;height:14px"></i>已整理'; lucide.createIcons({ attrs: { width: 16, height: 16, 'stroke-width': 1.8 } }); showToast('今天的记录已整理'); });
     $('#planTomorrow').addEventListener('click', () => { activateView('plan'); showToast('已加入明日计划：确认婚礼场地方案'); });
     $('#editReview').addEventListener('click', () => openDailyFeelingEditor(false));
+    $$('#mealQuickOptions [data-meal-quick]').forEach(button => button.addEventListener('click', () => { $('#mealContent').value = button.dataset.mealQuick; $$('#mealQuickOptions [data-meal-quick]').forEach(item => item.classList.toggle('is-selected', item === button)); $('#mealContent').focus(); }));
+    $('#mealContent').addEventListener('input', () => { const value = $('#mealContent').value.trim(); $$('#mealQuickOptions [data-meal-quick]').forEach(button => button.classList.toggle('is-selected', button.dataset.mealQuick === value)); });
     $('#saveMeal').addEventListener('click', () => {
       const type = $('#mealType').value; const content = $('#mealContent').value.trim(); const feel = $('#mealFeel').value;
       if (!content) { showToast('先写下今天吃了什么'); return; }
@@ -2005,7 +2014,7 @@
       editingMeal = null;
       renderMealGrid();
       refreshSavedRecordViews();
-      closeModals(); $('#mealContent').value = '';
+      closeModals(); $('#mealContent').value = ''; $$('#mealQuickOptions [data-meal-quick]').forEach(button => button.classList.remove('is-selected'));
     });
     $('#saveGoals').addEventListener('click', () => {
       const name = $('#goalNameInput').value.trim();
