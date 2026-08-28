@@ -726,8 +726,8 @@
         <p class="eyebrow">饮食记录 · 8 月 20 日</p><h2 class="hero-title" id="meals-title">吃得好，是照顾自己的方式。</h2>
         <div class="section-title"><h2>今日餐桌</h2><button class="soft-button" id="openMeal"><i data-lucide="plus" style="width:14px;height:14px"></i>记录饮食</button></div>
         <div class="meal-grid" id="mealGrid">
-          <button class="meal-item meal-editable" data-meal-type="早餐" data-meal-content="希腊酸奶 + 香蕉 + 鸡蛋" data-meal-feel="刚刚好" aria-label="编辑早餐：希腊酸奶、香蕉和鸡蛋"><span class="meal-icon breakfast"><i data-lucide="sun"></i></span><span class="meal-copy"><strong>早餐 · 希腊酸奶 + 香蕉 + 鸡蛋</strong><p>07:25 · 高蛋白 · 记录完整</p></span><span class="meal-add" aria-hidden="true"><i data-lucide="chevron-right"></i></span></button>
-          <button class="meal-item meal-editable" data-meal-type="午餐" data-meal-content="照烧鸡腿饭 + 西兰花" data-meal-feel="刚刚好" aria-label="编辑午餐：照烧鸡腿饭和西兰花"><span class="meal-icon lunch"><i data-lucide="salad"></i></span><span class="meal-copy"><strong>午餐 · 照烧鸡腿饭 + 西兰花</strong><p>12:20 · 约 32g 蛋白质</p></span><span class="meal-add" aria-hidden="true"><i data-lucide="chevron-right"></i></span></button>
+          <button class="meal-item meal-editable" data-meal-type="早餐" aria-label="添加早餐"><span class="meal-icon breakfast"><i data-lucide="sun"></i></span><span class="meal-copy"><strong>早餐</strong><p>今天还没有记录，点击添加</p></span><span class="meal-add" aria-hidden="true"><i data-lucide="plus"></i></span></button>
+          <button class="meal-item meal-editable" data-meal-type="午餐" aria-label="添加午餐"><span class="meal-icon lunch"><i data-lucide="salad"></i></span><span class="meal-copy"><strong>午餐</strong><p>今天还没有记录，点击添加</p></span><span class="meal-add" aria-hidden="true"><i data-lucide="plus"></i></span></button>
           <button class="meal-item meal-editable" data-new-meal-type="晚餐" aria-label="添加晚餐"><span class="meal-icon dinner"><i data-lucide="moon"></i></span><span class="meal-copy"><strong>晚餐</strong><p>还没有记录，先为今晚选一道菜吧</p></span><span class="meal-add" aria-hidden="true"><i data-lucide="plus"></i></span></button>
           <button class="meal-item meal-editable" data-new-meal-type="饮品 / 零食" aria-label="添加饮品或零食"><span class="meal-icon snack"><i data-lucide="coffee"></i></span><span class="meal-copy"><strong>饮品 / 零食</strong><p>今天还没有记录</p></span><span class="meal-add" aria-hidden="true"><i data-lucide="plus"></i></span></button>
         </div>
@@ -1284,19 +1284,34 @@
       $$('.meal-item', grid).forEach(item => {
         const type = item.dataset.mealType || item.dataset.newMealType;
         const saved = [...meals].reverse().find(meal => meal.type === type);
-        if (!saved) return;
+        const copy = $('.meal-copy', item);
+        if (!saved) {
+          item.dataset.mealType = type;
+          delete item.dataset.mealId;
+          delete item.dataset.mealContent;
+          delete item.dataset.mealFeel;
+          delete item.dataset.newMealType;
+          if (copy) {
+            $('strong', copy).textContent = type;
+            $('p', copy).textContent = '今天还没有记录，点击添加';
+          }
+          $('.meal-add', item).innerHTML = '<i data-lucide="plus"></i>';
+          item.setAttribute('aria-label', `添加${type}`);
+          return;
+        }
         item.dataset.mealId = saved.id;
         item.dataset.mealType = saved.type;
         item.dataset.mealContent = saved.content;
         item.dataset.mealFeel = saved.feel || '已记录';
         delete item.dataset.newMealType;
-        const copy = $('.meal-copy', item);
         if (copy) {
           $('strong', copy).textContent = `${saved.type} · ${saved.content}`;
           $('p', copy).textContent = `${saved.time || '今天'} · ${saved.feel || '已记录'} · 记录完整`;
         }
+        $('.meal-add', item).innerHTML = '<i data-lucide="chevron-right"></i>';
         item.setAttribute('aria-label', `编辑${saved.type}：${saved.content}`);
       });
+      lucide.createIcons({ attrs: { width: 16, height: 16, 'stroke-width': 1.8 } });
     }
     function refreshSavedRecordViews(date = dateKey()) {
       renderTodaySummary();
