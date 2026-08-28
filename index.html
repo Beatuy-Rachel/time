@@ -1218,6 +1218,25 @@
       if (end === start) end = start + Math.max(1, Number(activity.durationMinutes) || 0);
       return [Math.max(0, Math.min(24 * 60, start)), Math.max(0, Math.min(24 * 60, end))];
     }
+    function activityDurationMinutes(activity) {
+      const [start, end] = activityInterval(activity);
+      return Math.max(1, end - start);
+    }
+    function repairStoredActivityDurations() {
+      Object.keys(localStorage).filter(key => key.startsWith(dayRecordPrefix)).forEach(key => {
+        try {
+          const saved = JSON.parse(localStorage.getItem(key) || 'null');
+          if (!saved || !Array.isArray(saved.activities)) return;
+          let changed = false;
+          const activities = saved.activities.map(activity => {
+            const duration = activityDurationMinutes(activity);
+            if (Number(activity.durationMinutes) !== duration) { changed = true; return { ...activity, durationMinutes: duration }; }
+            return activity;
+          });
+          if (changed) localStorage.setItem(key, JSON.stringify({ ...saved, activities }));
+        } catch (error) { /* keep the current record usable */ }
+      });
+    }
     function unionMinutes(activities) {
       const intervals = activities.map(activityInterval).filter(([start, end]) => end > start).sort((a, b) => a[0] - b[0]);
       let total = 0; let current = null;
@@ -1228,7 +1247,7 @@
       const record = loadDayRecord(date);
       const activities = [...record.activities].sort((a, b) => String(a.start || '').localeCompare(String(b.start || '')));
       const categories = { '工作': 0, '生活': 0, '成长': 0, '照顾自己': 0 };
-      activities.forEach(activity => { const category = normalizeHistoryCategory(activity.category, activity.name); categories[category] += Number(activity.durationMinutes) || durationBetweenTimes(activity.start, activity.end); });
+      activities.forEach(activity => { const category = normalizeHistoryCategory(activity.category, activity.name); categories[category] += activityDurationMinutes(activity); });
       return { record, activities, actualMinutes: unionMinutes(activities), growthMinutes: categories['成长'], categories };
     }
     function timelineBlockStyle(activity) {
@@ -1271,7 +1290,7 @@
       container.innerHTML = summary.activities.map(activity => {
         const category = normalizeHistoryCategory(activity.category, activity.name);
         const name = activity.name || '未命名活动';
-        return `<div class="timeline-entry"><span class="timeline-time">${escapeHtml(activity.start || '--:--')}</span><div class="timeline-lane"><div class="time-block ${categoryClass(category)}" style="${timelineBlockStyle(activity)}" title="${escapeHtml(name)} · ${formatMinutes(activity.durationMinutes || durationBetweenTimes(activity.start, activity.end))}">${escapeHtml(name)}</div></div><button class="timeline-delete" type="button" data-delete-activity="${escapeHtml(activity.id)}" data-activity-date="${dateKey()}" aria-label="删除${escapeHtml(name)}" title="删除记录"><i data-lucide="trash-2"></i></button></div>`;
+        return `<div class="timeline-entry"><span class="timeline-time">${escapeHtml(activity.start || '--:--')}</span><div class="timeline-lane"><div class="time-block ${categoryClass(category)}" style="${timelineBlockStyle(activity)}" title="${escapeHtml(name)} · ${formatMinutes(activityDurationMinutes(activity))}">${escapeHtml(name)}</div></div><button class="timeline-delete" type="button" data-delete-activity="${escapeHtml(activity.id)}" data-activity-date="${dateKey()}" aria-label="删除${escapeHtml(name)}" title="删除记录"><i data-lucide="trash-2"></i></button></div>`;
       }).join('');
       bindActivityDeleteButtons(container);
       lucide.createIcons({ attrs: { width: 16, height: 16, 'stroke-width': 1.8 } });
@@ -1382,7 +1401,7 @@
       $('#historyBreakdownHint').textContent = `${date.getMonth() + 1} 月 ${date.getDate()} 日 · 并行活动会分别展示`;
       Object.entries({ work: '工作', life: '生活', growth: '成长', care: '照顾自己' }).forEach(([key, category]) => { const width = summary.actualMinutes ? Math.min(100, Math.round(summary.categories[category] / summary.actualMinutes * 100)) : 0; $(`#history${key[0].toUpperCase() + key.slice(1)}Bar`).style.width = `${width}%`; $(`#history${key[0].toUpperCase() + key.slice(1)}Value`).textContent = formatMinutes(summary.categories[category]); });
       const list = $('#historyRecordList');
-      list.innerHTML = summary.activities.length ? summary.activities.map(activity => `<div class="history-record"><span class="history-record-time">${escapeHtml(activity.start || '--:--')}</span><div class="history-record-copy"><strong>${escapeHtml(activity.name || '未命名活动')}</strong><small>${formatMinutes(activity.durationMinutes || durationBetweenTimes(activity.start, activity.end))}</small></div><span class="history-record-tag">${escapeHtml(normalizeHistoryCategory(activity.category, activity.name))}</span><button class="history-delete" type="button" data-delete-activity="${escapeHtml(activity.id)}" data-activity-date="${escapeHtml(selectedReviewDate)}" aria-label="删除${escapeHtml(activity.name || '这条活动记录')}" title="删除记录"><i data-lucide="trash-2"></i></button></div>`).join('') : '<div class="history-empty">这一天还没有时间记录。记录一段活动后，就会沉淀在这里。</div>';
+      list.innerHTML = summary.activities.length ? summary.activities.map(activity => `<div class="history-record"><span class="history-record-time">${escapeHtml(activity.start || '--:--')}</span><div class="history-record-copy"><strong>${escapeHtml(activity.name || '未命名活动')}</strong><small>${formatMinutes(activityDurationMinutes(activity))}</small></div><span class="history-record-tag">${escapeHtml(normalizeHistoryCategory(activity.category, activity.name))}</span><button class="history-delete" type="button" data-delete-activity="${escapeHtml(activity.id)}" data-activity-date="${escapeHtml(selectedReviewDate)}" aria-label="删除${escapeHtml(activity.name || '这条活动记录')}" title="删除记录"><i data-lucide="trash-2"></i></button></div>`).join('') : '<div class="history-empty">这一天还没有时间记录。记录一段活动后，就会沉淀在这里。</div>';
       bindActivityDeleteButtons(list);
       lucide.createIcons({ attrs: { width: 16, height: 16, 'stroke-width': 1.8 } });
       $('#historyRecordCount').textContent = summary.activities.length ? `${summary.activities.length} 条记录` : '暂无记录';
@@ -1512,7 +1531,7 @@
       '照顾自己': { css: 'yellow' }
     };
     function weekActivityDuration(activity) {
-      return Number(activity.durationMinutes) || durationBetweenTimes(activity.start, activity.end);
+      return activityDurationMinutes(activity);
     }
     function weekActivityRows(summaries) {
       return summaries.flatMap(item => item.summary.activities.map(activity => ({
@@ -1813,7 +1832,7 @@
         type: 'done',
         name: activity.name || '未命名活动',
         time: activity.start || '--:--',
-        detail: formatMinutes(activity.durationMinutes || durationBetweenTimes(activity.start, activity.end)),
+        detail: formatMinutes(activityDurationMinutes(activity)),
         category: normalizeHistoryCategory(activity.category, activity.name)
       }));
       return activities.concat(calendarPlanItemsForDate(date));
@@ -2025,6 +2044,7 @@
     loadSettings();
     renderDateLabels();
     selectedReviewDate = dateKey();
+    repairStoredActivityDurations();
     syncTodayPlanSnapshot();
     renderTodaySummary();
     renderHistoryDate();
